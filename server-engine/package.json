@@ -1,0 +1,20 @@
+{
+  "name": "ghoul-poker-mp",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "server"
+  ],
+  "scripts": {
+    "build:engine": "npm -w @ghoul/engine run build",
+    "build:server": "npm -w @ghoul/server run build",
+    "dev:server": "npm -w @ghoul/server run dev"
+  },
+  "devDependencies": {
+    "pg-mem": "^3.0.5",
+    "socket.io-client": "^4.7.5",
+    "typescript": "^5.5.3"
+  }
+}

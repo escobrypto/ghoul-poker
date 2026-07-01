@@ -6,6 +6,7 @@ import { useSoundEffects } from './hooks/useSoundEffects';
 import GhoulPokerTableScene from './components/GhoulPokerTableScene';
 import ActionBar from './components/ActionBar';
 import { ParticleField, Confetti } from './components/FX';
+import ShaderBackground from './components/ShaderBackground';
 import { ChatPanel, HistoryPanel, Toast } from './components/Panels';
 import Lobby from './components/Lobby';
 import { ReconnectScreen, LatencyBadge } from './components/NetOverlay';
@@ -19,6 +20,7 @@ export default function AppNet() {
 
   return (
     <>
+      <ShaderBackground />
       <ParticleField />
       <ReconnectScreen conn={g.conn} />
       <div className="topright-net"><LatencyBadge conn={g.conn} latency={g.latency} /></div>

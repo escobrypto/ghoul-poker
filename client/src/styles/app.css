@@ -483,3 +483,24 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 .lb-row.you .lb-name{color:var(--neon)}
 .lb-lvl{font-family:'Press Start 2P';font-size:9px;color:var(--gold);white-space:nowrap}
 .lb-wins{font-size:15px;color:var(--cyan);white-space:nowrap}
+
+/* ===== WEBGL SHADER BACKGROUND ===== */
+/* fixed, behind everything, non-interactive. The GPU-rendered ambient layer.
+   CRITICAL: the canvas carries a CSS animated-gradient fallback as its OWN
+   background. If WebGL renders, it paints over this. If WebGL is unavailable or
+   no-ops (old GPU, locked-down browser), this animated CSS shows instead — so a
+   shader failure degrades to a living gradient, never a dead black screen. */
+.shader-bg{
+  position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;display:block;
+  background:
+    radial-gradient(1200px 800px at 50% 62%, rgba(90,40,140,.28), transparent 60%),
+    radial-gradient(700px 500px at 22% 30%, rgba(30,180,110,.10), transparent 55%),
+    radial-gradient(700px 500px at 80% 70%, rgba(40,200,220,.08), transparent 55%),
+    #06040e;
+  animation: bgdrift 22s ease-in-out infinite alternate;
+}
+@keyframes bgdrift{
+  0%{background-position:0% 0%,0% 0%,0% 0%,0 0}
+  100%{background-position:0% 8%,4% -6%,-4% 5%,0 0}
+}
+.app,.lobby{position:relative;z-index:1}

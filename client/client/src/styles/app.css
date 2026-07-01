@@ -422,9 +422,10 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 .menu-btn.ghost{background:rgba(11,7,24,.5);border-style:dashed}
 .menu-btn .mt{font-family:'Press Start 2P';font-size:14px;letter-spacing:1px}
 .menu-btn .ms{font-size:15px;color:var(--ink-dim)}
-.join-row{display:flex;gap:8px}
-.join-row input{flex:1;background:#0a0716;border:2px solid var(--panel-edge);border-radius:10px;color:#fff;font-family:'Press Start 2P';font-size:16px;letter-spacing:4px;text-align:center;padding:14px;outline:none}
+.join-row{display:flex;gap:8px;align-items:stretch;width:100%}
+.join-row input{flex:1 1 auto;min-width:0;background:#0a0716;border:2px solid var(--panel-edge);border-radius:10px;color:#fff;font-family:'Press Start 2P';font-size:16px;letter-spacing:4px;text-align:center;padding:14px 10px;outline:none;box-sizing:border-box}
 .join-row input:focus{border-color:var(--violet)}
+.join-row .gbtn{flex:0 0 auto;display:flex;align-items:center;justify-content:center;padding:0 20px;white-space:nowrap}
 .lobby-friends{padding:10px}
 .friends-empty{text-align:center;color:var(--ink-dim);padding:20px}
 .friends-empty .fi{font-size:42px;margin-bottom:12px;filter:drop-shadow(0 0 12px var(--violet))}

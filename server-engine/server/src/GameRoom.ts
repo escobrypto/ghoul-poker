@@ -233,12 +233,12 @@ export class GameRoom {
   private showdown() {
     const s = this.state!;
     s.stage = 'showdown';
-    const potSize = s.pot;
     const r = resolveShowdown(s);
     this.syncStacks();
     this.pushState();
     this.emit.handResult({
-      winners: r.winners.map((w) => ({ id: w.id, name: w.name, amount: Math.floor(potSize / r.winners.length) })),
+      // exact chips each player received (side pots + uncalled-bet refunds)
+      winners: r.payouts,
       handName: r.handName, winningCards: r.winningCards, showdown: true,
     });
     this.scheduleNextHand();
@@ -249,6 +249,7 @@ export class GameRoom {
     const w = activePlayers(s)[0];
     const potSize = s.pot;
     w.stack += s.pot;
+    s.pot = 0; // paid out — snapshot must not double-count it
     this.syncStacks();
     this.pushState();
     this.emit.handResult({

@@ -67,8 +67,7 @@ export default function Lobby({
     <div className="lobby">
       <div className="lobby-card">
         <div className="lobby-brand">
-          <div className="sigil big">GG</div>
-          <h1>GHOUL <b>POKER</b></h1>
+          <img src="/assets/ui/logo.png" className="lobby-logo" alt="GHOUL POKER" />
           <div className="tagline">NIGHT OWLS ONLY · {conn === 'online' ? <span className="on">ONLINE</span> : <span className="off">{conn.toUpperCase()}</span>} {conn === 'online' && <span className="ping">{latency}ms</span>}</div>
           <div className="verstamp">v1.0</div>
         </div>

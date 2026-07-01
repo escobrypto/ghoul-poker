@@ -36,3 +36,10 @@ CREATE TABLE IF NOT EXISTS hands (
   played_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_hands_account ON hands (account_id, played_at DESC);
+
+-- Backstop: founder numbers must be unique. Wrapped so boot survives even if a
+-- historical duplicate exists (the advisory lock in PgStore prevents new ones).
+DO $$ BEGIN
+  CREATE UNIQUE INDEX IF NOT EXISTS uq_accounts_founder_number
+    ON accounts (founder_number) WHERE founder_number IS NOT NULL;
+EXCEPTION WHEN others THEN NULL; END $$;

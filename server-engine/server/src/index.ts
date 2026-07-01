@@ -51,7 +51,7 @@ function emitFactoryFor(code: string) {
       const sid = liveSocket.get(viewerId);
       if (sid) io.to(sid).emit('table:state', t);
     },
-    handResult: (r: any) => { io.to(code).emit('hand:result', r); awardXp(code, r); },
+    handResult: (r: any) => { io.to(code).emit('hand:result', r); void awardXp(code, r).catch(() => {}); },
     roomInfo: () => {
       const room = rooms.get(code); if (!room) return;
       io.to(code).emit('room:info', {
@@ -65,6 +65,7 @@ function emitFactoryFor(code: string) {
 
 // award XP + record stats when a hand resolves (persistence side-effect)
 async function awardXp(code: string, result: any) {
+  try {
   for (const w of result.winners) {
     await store.addXp(w.id, result.showdown ? 70 : 45);
     await store.recordHand(w.id, true, 0);
@@ -74,6 +75,10 @@ async function awardXp(code: string, result: any) {
     const prof = await store.getProfile(w.id);
     const sid = liveSocket.get(w.id);
     if (prof && sid) io.to(sid).emit('profile', prof);
+  }
+  } catch (e) {
+    // A transient store error must never take the process (and every table) down.
+    console.error('awardXp failed (non-fatal):', e);
   }
 }
 

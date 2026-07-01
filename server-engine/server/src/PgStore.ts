@@ -61,9 +61,10 @@ export class PgStore implements Store {
       const found = await this.pool.query('SELECT * FROM accounts WHERE token = $1', [token]);
       if (found.rowCount) {
         const a = found.rows[0];
-        if (name && name !== a.name) {
-          await this.pool.query('UPDATE accounts SET name=$1, last_seen=now() WHERE id=$2', [name.slice(0, 16), a.id]);
-          a.name = name.slice(0, 16);
+        const clean = sanitizeName(name, a.name);
+        if (clean !== a.name) {
+          await this.pool.query('UPDATE accounts SET name=$1, last_seen=now() WHERE id=$2', [clean, a.id]);
+          a.name = clean;
         } else {
           await this.pool.query('UPDATE accounts SET last_seen=now() WHERE id=$1', [a.id]);
         }
@@ -74,7 +75,7 @@ export class PgStore implements Store {
     // default derived from the real id. Avoids depending on the serial sequence
     // name in SQL (which isn't portable / guaranteed).
     const newToken = `gp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}`;
-    const provided = (name && name.trim()) ? name.trim().slice(0, 16) : null;
+    const provided = (name && name.trim()) ? sanitizeName(name, 'Ghoul') : null;
     const ins = await this.pool.query(
       `INSERT INTO accounts (token, name) VALUES ($1, $2) RETURNING *`,
       [newToken, provided ?? 'Ghoul'],
@@ -148,6 +149,11 @@ export class PgStore implements Store {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
+      // Serialize ALL founder grants: the per-account row lock below does NOT
+      // stop two DIFFERENT accounts from counting concurrently and both taking
+      // slot #100. This advisory lock is held to COMMIT and makes the
+      // count->grant sequence globally single-file.
+      await client.query('SELECT pg_advisory_xact_lock(777001)');
       const me = await client.query('SELECT founder, founder_number, level FROM accounts WHERE id=$1 FOR UPDATE', [id]);
       if (!me.rowCount) { await client.query('ROLLBACK'); return null; }
       const row = me.rows[0];

@@ -398,7 +398,8 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 @keyframes btnDanger{0%,100%{box-shadow:0 0 14px var(--danger),inset 0 0 8px rgba(255,64,96,.4)}50%{box-shadow:0 0 32px var(--danger),0 0 50px rgba(255,64,96,.5),inset 0 0 14px rgba(255,64,96,.6)}}
 
 /* ===== LOBBY ===== */
-.lobby{position:relative;z-index:2;min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box}
+.lobby{position:relative;z-index:2;min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box;background:linear-gradient(180deg,rgba(6,4,14,.78),rgba(6,4,14,.9) 70%,rgba(6,4,14,.96)),url('/assets/backgrounds/poker-room.png') center/cover no-repeat;image-rendering:pixelated}
+.lobby-logo{display:block;width:290px;max-width:82%;margin:0 auto 10px;image-rendering:pixelated;filter:drop-shadow(0 0 16px rgba(157,78,221,.55)) drop-shadow(0 0 6px rgba(57,255,139,.25))}
 .lobby-card{width:100%;max-width:460px;box-sizing:border-box;border:2px solid var(--panel-edge);border-radius:18px;background:linear-gradient(180deg,rgba(20,12,36,.92),rgba(6,4,14,.96));padding:28px;box-shadow:0 0 60px rgba(157,78,221,.25),0 20px 60px rgba(0,0,0,.6)}
 /* small phones: tighten padding so the card never forces horizontal scroll */
 @media (max-width:420px){

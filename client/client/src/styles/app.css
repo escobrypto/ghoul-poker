@@ -398,8 +398,13 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 @keyframes btnDanger{0%,100%{box-shadow:0 0 14px var(--danger),inset 0 0 8px rgba(255,64,96,.4)}50%{box-shadow:0 0 32px var(--danger),0 0 50px rgba(255,64,96,.5),inset 0 0 14px rgba(255,64,96,.6)}}
 
 /* ===== LOBBY ===== */
-.lobby{position:relative;z-index:2;min-height:100vh;display:grid;place-items:center;padding:24px}
-.lobby-card{width:100%;max-width:460px;border:2px solid var(--panel-edge);border-radius:18px;background:linear-gradient(180deg,rgba(20,12,36,.92),rgba(6,4,14,.96));padding:28px;box-shadow:0 0 60px rgba(157,78,221,.25),0 20px 60px rgba(0,0,0,.6)}
+.lobby{position:relative;z-index:2;min-height:100vh;display:grid;place-items:center;padding:24px;box-sizing:border-box}
+.lobby-card{width:100%;max-width:460px;box-sizing:border-box;border:2px solid var(--panel-edge);border-radius:18px;background:linear-gradient(180deg,rgba(20,12,36,.92),rgba(6,4,14,.96));padding:28px;box-shadow:0 0 60px rgba(157,78,221,.25),0 20px 60px rgba(0,0,0,.6)}
+/* small phones: tighten padding so the card never forces horizontal scroll */
+@media (max-width:420px){
+  .lobby{padding:14px}
+  .lobby-card{padding:20px}
+}
 .lobby-brand{text-align:center;margin-bottom:20px}
 .sigil.big{width:72px;height:72px;font-size:24px;margin:0 auto 12px}
 .lobby-brand h1{font-family:'Press Start 2P';font-size:26px;color:#fff;text-shadow:0 0 10px var(--neon),3px 3px 0 #000;letter-spacing:1px}

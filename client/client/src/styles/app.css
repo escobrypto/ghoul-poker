@@ -504,3 +504,6 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
   100%{background-position:0% 8%,4% -6%,-4% 5%,0 0}
 }
 .app,.lobby{position:relative;z-index:1}
+
+/* version stamp (small, unobtrusive) */
+.verstamp{margin-top:6px;font-family:'Press Start 2P';font-size:8px;color:var(--ink-dim);letter-spacing:2px;opacity:.6}

@@ -56,6 +56,8 @@ export interface ProfilePayload {
   chips: number;
   handsPlayed: number;
   handsWon: number;
+  founder: boolean;
+  founderNumber: number | null;
 }
 
 export interface AuthResult {
@@ -65,6 +67,6 @@ export interface AuthResult {
   error?: string;
 }
 
-export interface LeaderRow { name: string; level: number; xp: number; handsWon: number; }
+export interface LeaderRow { name: string; level: number; xp: number; handsWon: number; founder: boolean; founderNumber: number | null; }
 
 export type { ActionType };

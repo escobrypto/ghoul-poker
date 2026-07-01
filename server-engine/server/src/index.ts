@@ -68,6 +68,9 @@ async function awardXp(code: string, result: any) {
   for (const w of result.winners) {
     await store.addXp(w.id, result.showdown ? 70 : 45);
     await store.recordHand(w.id, true, 0);
+    // founder program: first 100 to reach level 2 get a permanent badge.
+    // race-safe + idempotent inside the store; safe to call every time.
+    await store.grantFounderIfEligible(w.id);
     const prof = await store.getProfile(w.id);
     const sid = liveSocket.get(w.id);
     if (prof && sid) io.to(sid).emit('profile', prof);
@@ -117,6 +120,17 @@ io.on('connection', (socket) => {
   socket.on('leaderboard', async (ack: (rows: any[]) => void) => {
     if (typeof ack !== 'function') return;
     try { ack(await store.leaderboard(20)); } catch { ack([]); }
+  });
+
+  // persist a chosen display name to the account
+  socket.on('profile:setName', async ({ name }, ack) => {
+    const s = sessions.get(socket.id);
+    if (!s) { if (typeof ack === 'function') ack({ error: 'Not authenticated' }); return; }
+    try {
+      const prof = await store.setName(s.accountId, String(name || ''));
+      if (prof) { s.name = prof.name; if (typeof ack === 'function') ack(prof); io.to(socket.id).emit('profile', prof); }
+      else if (typeof ack === 'function') ack({ error: 'Failed' });
+    } catch { if (typeof ack === 'function') ack({ error: 'Failed' }); }
   });
 
   socket.on('disconnect', () => {

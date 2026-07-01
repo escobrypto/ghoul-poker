@@ -69,9 +69,10 @@ export interface ClientToServer {
   'chat': (p: { msg: string }) => void;
   'ping:rt': (ack: () => void) => void;
   'leaderboard': (ack: (rows: LeaderRow[]) => void) => void;
+  'profile:setName': (p: { name: string }, ack: (r: ProfilePayload | { error: string }) => void) => void;
 }
 
-export interface LeaderRow { name: string; level: number; xp: number; handsWon: number; }
+export interface LeaderRow { name: string; level: number; xp: number; handsWon: number; founder: boolean; founderNumber: number | null; }
 
 // ---- server → client events ----
 export interface ServerToClient {
@@ -99,4 +100,6 @@ export interface ProfilePayload {
   chips: number;       // persistent play-money bank
   handsPlayed: number;
   handsWon: number;
+  founder: boolean;        // one of the first 100 participants
+  founderNumber: number | null; // 1..100
 }

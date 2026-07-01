@@ -13,9 +13,15 @@ CREATE TABLE IF NOT EXISTS accounts (
   chips         BIGINT NOT NULL DEFAULT 1000, -- persistent play-money bank
   hands_played  INT  NOT NULL DEFAULT 0,
   hands_won     INT  NOT NULL DEFAULT 0,
+  founder        BOOLEAN NOT NULL DEFAULT false, -- one of the first 100 participants
+  founder_number INT,                            -- their founder rank 1..100 (null if not)
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   last_seen     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- idempotent upgrade for databases created before founder columns existed
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS founder BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS founder_number INT;
 
 -- leaderboard query hits this index (rank by level desc, then xp desc)
 CREATE INDEX IF NOT EXISTS idx_accounts_rank ON accounts (level DESC, xp DESC, hands_won DESC);

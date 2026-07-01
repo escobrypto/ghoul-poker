@@ -45,7 +45,7 @@ export default function Leaderboard({ profile, fetchLeaderboard, refreshKey }: P
             return (
               <div key={`${r.name}-${i}`} className={`lb-row${isYou ? ' you' : ''}${i < 3 ? ' top' : ''}`}>
                 <span className="lb-rank">{i < 3 ? MEDAL[i] : `#${i + 1}`}</span>
-                <span className="lb-name">{r.name}{isYou ? ' (you)' : ''}</span>
+                <span className="lb-name">{r.name}{r.founder && <span className="lb-founder" title={`Founder #${r.founderNumber}`}> 👑</span>}{isYou ? ' (you)' : ''}</span>
                 <span className="lb-lvl">LVL {r.level}</span>
                 <span className="lb-wins">{r.handsWon}W</span>
               </div>

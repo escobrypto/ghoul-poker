@@ -513,3 +513,10 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 
 /* version stamp (small, unobtrusive) */
 .verstamp{margin-top:6px;font-family:'Press Start 2P';font-size:8px;color:var(--ink-dim);letter-spacing:2px;opacity:.6}
+
+/* ===== FOUNDER BADGE ===== */
+.prof-info{flex:1;min-width:0}
+.name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.founder-badge{font-family:'Press Start 2P';font-size:8px;color:var(--gold);border:1px solid var(--gold);border-radius:5px;padding:4px 7px;white-space:nowrap;text-shadow:0 0 6px rgba(255,206,74,.5);box-shadow:0 0 10px rgba(255,206,74,.25);animation:founderGlow 3s ease-in-out infinite}
+@keyframes founderGlow{0%,100%{box-shadow:0 0 8px rgba(255,206,74,.2)}50%{box-shadow:0 0 16px rgba(255,206,74,.45)}}
+.lb-founder{color:var(--gold);text-shadow:0 0 6px rgba(255,206,74,.5)}

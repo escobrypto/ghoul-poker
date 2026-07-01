@@ -76,9 +76,12 @@ export default function Lobby({
         {profile && (
           <div className="lobby-profile">
             <img src={avatarSrc('YOU')} className="ghoul-img" alt="" />
-            <div>
-              <input className="namein" defaultValue={profile.name} maxLength={16}
-                onBlur={(e) => onSetName(e.target.value.trim() || profile.name)} />
+            <div className="prof-info">
+              <div className="name-row">
+                <input className="namein" defaultValue={profile.name} maxLength={16}
+                  onBlur={(e) => onSetName(e.target.value.trim() || profile.name)} />
+                {profile.founder && <span className="founder-badge" title={`Founder #${profile.founderNumber}`}>👑 FOUNDER #{profile.founderNumber}</span>}
+              </div>
               <div className="lvl">LVL {profile.level} · {profile.xp}/{profile.xpNeeded} XP · ◈{profile.chips.toLocaleString()}</div>
             </div>
           </div>

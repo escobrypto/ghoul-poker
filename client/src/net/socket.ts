@@ -105,7 +105,13 @@ export class GhoulSocket {
   private stopPing() { if (this.pingTimer) { clearInterval(this.pingTimer); this.pingTimer = null; } }
 
   // ---- actions (client → server) ----
-  setName(name: string) { localStorage.setItem(NAME_KEY, name); }
+  setName(name: string, cb?: (ok: boolean) => void) {
+    localStorage.setItem(NAME_KEY, name);
+    this.sock.emit('profile:setName', { name }, (r: any) => {
+      if (r && !r.error) { this.handlers.onProfile?.(r); cb?.(true); }
+      else cb?.(false);
+    });
+  }
 
   createRoom(isPublic: boolean, cb: (code: string | null) => void) {
     this.sock.emit('room:create', { isPublic }, (r: any) => {

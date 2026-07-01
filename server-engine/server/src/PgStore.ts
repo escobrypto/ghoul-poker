@@ -17,7 +17,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import pg from 'pg';
 import type { Store, Account } from './Store.js';
-import { xpNeeded } from './Store.js';
+import { xpNeeded, sanitizeName, FOUNDER_LEVEL, FOUNDER_CAP } from './Store.js';
 import type { ProfilePayload } from './protocol.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -27,6 +27,7 @@ function rowToProfile(r: any): ProfilePayload {
     id: Number(r.id), name: r.name, level: r.level, xp: r.xp,
     xpNeeded: xpNeeded(r.level), chips: Number(r.chips),
     handsPlayed: r.hands_played, handsWon: r.hands_won,
+    founder: !!r.founder, founderNumber: r.founder_number ?? null,
   };
 }
 
@@ -126,17 +127,52 @@ export class PgStore implements Store {
 
   async leaderboard(limit: number) {
     const r = await this.pool.query(
-      `SELECT name, level, xp, hands_won FROM accounts
+      `SELECT name, level, xp, hands_won, founder, founder_number FROM accounts
        ORDER BY level DESC, xp DESC, hands_won DESC LIMIT $1`,
       [limit],
     );
-    return r.rows.map((x) => ({ name: x.name, level: x.level, xp: x.xp, handsWon: x.hands_won }));
+    return r.rows.map((x) => ({ name: x.name, level: x.level, xp: x.xp, handsWon: x.hands_won, founder: !!x.founder, founderNumber: x.founder_number ?? null }));
+  }
+
+  async setName(id: number, name: string): Promise<ProfilePayload | null> {
+    await this.pool.query('UPDATE accounts SET name=$1 WHERE id=$2', [sanitizeName(name, `Ghoul#${id}`), id]);
+    return this.getProfile(id);
+  }
+
+  /**
+   * Grant a founder number, race-safe. A transaction locks the count so two
+   * simultaneous level-ups can't both claim slot #100. Idempotent: an existing
+   * founder just returns their number. Only accounts at FOUNDER_LEVEL qualify.
+   */
+  async grantFounderIfEligible(id: number): Promise<number | null> {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const me = await client.query('SELECT founder, founder_number, level FROM accounts WHERE id=$1 FOR UPDATE', [id]);
+      if (!me.rowCount) { await client.query('ROLLBACK'); return null; }
+      const row = me.rows[0];
+      if (row.founder) { await client.query('COMMIT'); return row.founder_number; } // idempotent
+      if (row.level < FOUNDER_LEVEL) { await client.query('ROLLBACK'); return null; }
+      // count existing founders under a lock to prevent overshooting the cap
+      const cnt = await client.query('SELECT COUNT(*)::int AS n FROM accounts WHERE founder=true');
+      const n = cnt.rows[0].n as number;
+      if (n >= FOUNDER_CAP) { await client.query('ROLLBACK'); return null; }
+      const num = n + 1;
+      await client.query('UPDATE accounts SET founder=true, founder_number=$1 WHERE id=$2', [num, id]);
+      await client.query('COMMIT');
+      return num;
+    } catch (e) {
+      await client.query('ROLLBACK'); throw e;
+    } finally {
+      client.release();
+    }
   }
 
   private toAccount(r: any): Account {
     return {
       id: Number(r.id), name: r.name, token: r.token, level: r.level,
       xp: r.xp, chips: Number(r.chips), handsPlayed: r.hands_played, handsWon: r.hands_won,
+      founder: !!r.founder, founderNumber: r.founder_number ?? null,
     };
   }
 

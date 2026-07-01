@@ -46,7 +46,7 @@ export interface Store {
   grantFounderIfEligible(id: number): Promise<number | null>;
 }
 
-type LeaderRow = { name: string; level: number; xp: number; handsWon: number; founder: boolean; founderNumber: number | null };
+type LeaderRow = { id: number; name: string; level: number; xp: number; handsWon: number; founder: boolean; founderNumber: number | null };
 
 export class MemoryStore implements Store {
   private byId = new Map<number, Account>();
@@ -112,6 +112,6 @@ export class MemoryStore implements Store {
     return [...this.byId.values()]
       .sort((x, y) => (y.level - x.level) || (y.xp - x.xp) || (y.handsWon - x.handsWon))
       .slice(0, limit)
-      .map((a) => ({ name: a.name, level: a.level, xp: a.xp, handsWon: a.handsWon, founder: a.founder, founderNumber: a.founderNumber }));
+      .map((a) => ({ id: a.id, name: a.name, level: a.level, xp: a.xp, handsWon: a.handsWon, founder: a.founder, founderNumber: a.founderNumber }));
   }
 }

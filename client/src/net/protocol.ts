@@ -67,6 +67,6 @@ export interface AuthResult {
   error?: string;
 }
 
-export interface LeaderRow { name: string; level: number; xp: number; handsWon: number; founder: boolean; founderNumber: number | null; }
+export interface LeaderRow { id: number; name: string; level: number; xp: number; handsWon: number; founder: boolean; founderNumber: number | null; }
 
 export type { ActionType };

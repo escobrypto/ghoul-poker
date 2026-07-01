@@ -72,7 +72,7 @@ export interface ClientToServer {
   'profile:setName': (p: { name: string }, ack: (r: ProfilePayload | { error: string }) => void) => void;
 }
 
-export interface LeaderRow { name: string; level: number; xp: number; handsWon: number; founder: boolean; founderNumber: number | null; }
+export interface LeaderRow { id: number; name: string; level: number; xp: number; handsWon: number; founder: boolean; founderNumber: number | null; }
 
 // ---- server → client events ----
 export interface ServerToClient {

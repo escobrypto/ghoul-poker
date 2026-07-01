@@ -41,9 +41,9 @@ export default function Leaderboard({ profile, fetchLeaderboard, refreshKey }: P
       ) : (
         <div className="lb-list">
           {rows.map((r, i) => {
-            const isYou = profile && r.name === profile.name;
+            const isYou = profile && r.id === profile.id;
             return (
-              <div key={`${r.name}-${i}`} className={`lb-row${isYou ? ' you' : ''}${i < 3 ? ' top' : ''}`}>
+              <div key={r.id} className={`lb-row${isYou ? ' you' : ''}${i < 3 ? ' top' : ''}`}>
                 <span className="lb-rank">{i < 3 ? MEDAL[i] : `#${i + 1}`}</span>
                 <span className="lb-name">{r.name}{r.founder && <span className="lb-founder" title={`Founder #${r.founderNumber}`}> 👑</span>}{isYou ? ' (you)' : ''}</span>
                 <span className="lb-lvl">LVL {r.level}</span>

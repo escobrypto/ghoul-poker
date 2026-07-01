@@ -127,11 +127,11 @@ export class PgStore implements Store {
 
   async leaderboard(limit: number) {
     const r = await this.pool.query(
-      `SELECT name, level, xp, hands_won, founder, founder_number FROM accounts
+      `SELECT id, name, level, xp, hands_won, founder, founder_number FROM accounts
        ORDER BY level DESC, xp DESC, hands_won DESC LIMIT $1`,
       [limit],
     );
-    return r.rows.map((x) => ({ name: x.name, level: x.level, xp: x.xp, handsWon: x.hands_won, founder: !!x.founder, founderNumber: x.founder_number ?? null }));
+    return r.rows.map((x) => ({ id: Number(x.id), name: x.name, level: x.level, xp: x.xp, handsWon: x.hands_won, founder: !!x.founder, founderNumber: x.founder_number ?? null }));
   }
 
   async setName(id: number, name: string): Promise<ProfilePayload | null> {

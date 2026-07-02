@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { TableState } from '../engine/table';
 import { Bubble, ChipFlight } from '../hooks/useGhoulPoker';
 import PlayerSeat from './PlayerSeat';
@@ -6,6 +7,12 @@ import ChipFlights from './ChipFlights';
 import AllInCinematic from './AllInCinematic';
 import { TableLightning, SmokeLayer } from './FX';
 import { seatLayout } from '../data/ghouls';
+import { useStageScale } from '../hooks/useStageScale';
+
+// The play stage is authored at this fixed size and scaled as ONE unit to fit
+// any viewport (see useStageScale). Room dressing stays full-bleed behind it.
+const STAGE_W = 1200;
+const STAGE_H = 720;
 
 interface Props {
   state: TableState;
@@ -20,6 +27,8 @@ interface Props {
 }
 
 export default function GhoulPokerTableScene({ state, winners, winningCards, bubble, chipFlights, potPulse, winBurst, allInCinematic, onCardFlip }: Props) {
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const stageScale = useStageScale(sceneRef, STAGE_W, STAGE_H);
   const maxStack = Math.max(...state.players.map((p) => p.stack), 1);
   const potChips = Math.min(16, Math.floor(state.pot / 350) + (state.pot > 0 ? 1 : 0));
 
@@ -38,7 +47,7 @@ export default function GhoulPokerTableScene({ state, winners, winningCards, bub
   const deckY = btnPos.y < 50 ? btnPos.y + 8 : btnPos.y - 8;
 
   return (
-    <div className="scene">
+    <div className="scene" ref={sceneRef}>
       {/* ===== ROOM (back to front) ===== */}
       <div className="wall-brick" />
       <div className="wall-shade" />
@@ -74,7 +83,11 @@ export default function GhoulPokerTableScene({ state, winners, winningCards, bub
       {/* drifting smoke */}
       <SmokeLayer />
 
-      {/* ===== TABLE ===== */}
+      {/* ===== PLAY STAGE — fixed design size, scaled as one unit ===== */}
+      <div
+        className="stage"
+        style={{ width: STAGE_W, height: STAGE_H, transform: `translate(-50%,-50%) scale(${stageScale})` }}
+      >
       <div className="table-shadow" />
       <div className="felt">
         <div className="felt-surface" />
@@ -150,6 +163,8 @@ export default function GhoulPokerTableScene({ state, winners, winningCards, bub
 
       {/* ALL IN cinematic overlay */}
       <AllInCinematic cinematic={allInCinematic} playerCount={state.players.length} />
+      </div>
+      {/* ===== /PLAY STAGE ===== */}
 
       <div className="scene-vignette" />
     </div>

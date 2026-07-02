@@ -39,6 +39,19 @@ const C = mk(); await wait(300);
 const dead = await auth(C, li.token);
 t('dead session token -> new guest, NOT the account', dead.profile.id !== g.profile.id);
 
+console.log('[4.5] trailing-space + distinct-error cases (the production bug)');
+const E = mk(); await wait(300); await auth(E, undefined);
+const regSp = await emit(E, 'auth:register', { username: 'SpaceCadet', password: 'ghoulgang1 ' }); // mobile-keyboard trailing space
+t('register accepts (and trims) space-padded password', regSp.ok === true);
+const F = mk(); await wait(300); await auth(F, undefined);
+t('login WITHOUT the space works (trim policy)', (await emit(F, 'auth:login', { username: 'SpaceCadet', password: 'ghoulgang1' })).ok === true);
+t('login WITH the space also works', (await emit(F, 'auth:login', { username: 'SpaceCadet', password: 'ghoulgang1 ' })).ok === true);
+t('unknown username gets a DISTINCT error', (await emit(F, 'auth:login', { username: 'NoSuchGhoul', password: 'whatever123' })).error === 'No account with that username');
+t('wrong password says so plainly', (await emit(F, 'auth:login', { username: 'SpaceCadet', password: 'wrongwrong' })).error === 'Wrong password');
+const backIn = await emit(F, 'auth:login', { username: 'SpaceCadet', password: 'ghoulgang1' });
+t('success clears the fail counter (owner never locked out)', backIn.ok === true);
+E.disconnect(); F.disconnect();
+
 console.log('[5] login rate limit');
 const D = mk(); await wait(300); await auth(D, undefined);
 let limited = false;

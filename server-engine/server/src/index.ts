@@ -86,16 +86,21 @@ async function awardXp(code: string, result: any) {
   }
 }
 
-// ---- auth guardrails: small in-memory attempt limiter (5/min per socket+name) ----
-const authAttempts = new Map<string, { n: number; reset: number }>();
-function allowAuthAttempt(key: string): boolean {
-  const now = Date.now();
-  const a = authAttempts.get(key);
-  if (!a || now > a.reset) { authAttempts.set(key, { n: 1, reset: now + 60_000 }); return true; }
-  if (a.n >= 5) return false;
-  a.n++; return true;
+// ---- auth guardrails: throttle FAILED attempts (5 fails/min per socket + per
+// username). Successful logins never count — testing your own account can't
+// lock you out — and a success clears the username's fail counter.
+const authFails = new Map<string, { n: number; reset: number }>();
+function throttled(key: string): boolean {
+  const a = authFails.get(key);
+  return !!a && Date.now() <= a.reset && a.n >= 5;
 }
-setInterval(() => { const now = Date.now(); for (const [k, v] of authAttempts) if (now > v.reset) authAttempts.delete(k); }, 120_000).unref();
+function noteAuthFail(key: string) {
+  const now = Date.now();
+  const a = authFails.get(key);
+  if (!a || now > a.reset) authFails.set(key, { n: 1, reset: now + 60_000 });
+  else a.n++;
+}
+setInterval(() => { const now = Date.now(); for (const [k, v] of authFails) if (now > v.reset) authFails.delete(k); }, 120_000).unref();
 const USERNAME_RE = /^[A-Za-z0-9_]{3,16}$/;
 
 io.on('connection', (socket) => {
@@ -112,12 +117,12 @@ io.on('connection', (socket) => {
     try {
       const username = String(p?.username ?? '').trim();
       const password = String(p?.password ?? '');
-      if (!allowAuthAttempt(`r:${socket.id}`)) return ack({ error: 'Too many attempts — wait a minute' });
+      if (throttled(`r:${socket.id}`)) return ack({ error: 'Too many attempts — wait a minute' });
       if (!USERNAME_RE.test(username)) return ack({ error: 'Username must be 3–16 letters, numbers, or _' });
-      if (password.length < 8 || password.length > 72) return ack({ error: 'Password must be at least 8 characters' });
+      if (password.trim().length < 8 || password.length > 72) return ack({ error: 'Password must be at least 8 characters' });
       const cur = sessions.get(socket.id);
       const r = await store.register(cur?.accountId ?? null, username, password);
-      if (!r.ok) return ack({ error: r.error });
+      if (!r.ok) { noteAuthFail(`r:${socket.id}`); return ack({ error: r.error }); }
       sessions.set(socket.id, { accountId: r.account.id, name: r.account.name });
       liveSocket.set(r.account.id, socket.id);
       // a guest who already finished hands may qualify for GENESIS the moment they register
@@ -134,11 +139,17 @@ io.on('connection', (socket) => {
     try {
       const username = String(p?.username ?? '').trim();
       const password = String(p?.password ?? '');
-      if (!allowAuthAttempt(`l:${socket.id}`) || !allowAuthAttempt(`u:${username.toLowerCase()}`)) {
+      const ukey = `u:${username.toLowerCase()}`;
+      if (throttled(`l:${socket.id}`) || throttled(ukey)) {
         return ack({ error: 'Too many attempts — wait a minute' });
       }
       const r = await store.login(username, password);
-      if (!r.ok) return ack({ error: r.error });
+      if (!r.ok) {
+        noteAuthFail(`l:${socket.id}`); noteAuthFail(ukey);
+        console.log(`auth: login failed for "${username}" — ${r.error}`); // shows up in Railway logs
+        return ack({ error: r.error });
+      }
+      authFails.delete(ukey); // proven owner — clear the counter
       sessions.set(socket.id, { accountId: r.account.id, name: r.account.name });
       liveSocket.set(r.account.id, socket.id);
       const profile = await store.getProfile(r.account.id);

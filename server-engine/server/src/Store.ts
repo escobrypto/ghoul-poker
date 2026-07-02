@@ -123,6 +123,7 @@ export class MemoryStore implements Store {
   }
 
   async register(currentAccountId: number | null, username: string, password: string): Promise<AuthOutcome> {
+    password = password.trim(); // mobile keyboards love trailing spaces — never let one lock an account
     const key = `password:${username.toLowerCase()}`;
     if (this.providers.has(key)) return { ok: false, error: 'Username taken' };
     let acc = currentAccountId != null ? this.byId.get(currentAccountId) : undefined;
@@ -138,7 +139,10 @@ export class MemoryStore implements Store {
 
   async login(username: string, password: string): Promise<AuthOutcome> {
     const p = this.providers.get(`password:${username.toLowerCase()}`);
-    if (!p || !(await verifyPassword(password, p.secret))) return { ok: false, error: 'Wrong username or password' };
+    if (!p) return { ok: false, error: 'No account with that username' };
+    // trimmed first (current policy) then raw (accounts registered before trimming)
+    const okPw = (await verifyPassword(password.trim(), p.secret)) || (await verifyPassword(password, p.secret));
+    if (!okPw) return { ok: false, error: 'Wrong password' };
     const sessionToken = newSessionToken();
     this.sessions.set(sessionToken, p.accountId);
     return { ok: true, account: this.byId.get(p.accountId)!, sessionToken };

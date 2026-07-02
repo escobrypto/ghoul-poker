@@ -111,7 +111,7 @@ export class PgStore implements Store {
   // ---- auth: modular provider layer ('password' today; more providers later) ----
 
   async register(currentAccountId: number | null, username: string, password: string): Promise<AuthOutcome> {
-    const secret = await hashPassword(password);
+    const secret = await hashPassword(password.trim()); // trailing-space lockout protection
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -152,9 +152,10 @@ export class PgStore implements Store {
     const r = await this.pool.query(
       `SELECT p.secret, a.* FROM auth_providers p JOIN accounts a ON a.id = p.account_id
        WHERE p.provider='password' AND p.provider_key=$1`, [username.toLowerCase()]);
-    if (!r.rowCount || !(await verifyPassword(password, r.rows[0].secret))) {
-      return { ok: false, error: 'Wrong username or password' };
-    }
+    if (!r.rowCount) return { ok: false, error: 'No account with that username' };
+    // trimmed first (current policy) then raw (accounts registered before trimming)
+    const okPw = (await verifyPassword(password.trim(), r.rows[0].secret)) || (await verifyPassword(password, r.rows[0].secret));
+    if (!okPw) return { ok: false, error: 'Wrong password' };
     const sessionToken = newSessionToken();
     await this.pool.query('INSERT INTO sessions (token, account_id) VALUES ($1,$2)', [sessionToken, r.rows[0].id]);
     await this.pool.query('UPDATE accounts SET last_seen=now() WHERE id=$1', [r.rows[0].id]);

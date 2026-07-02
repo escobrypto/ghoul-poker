@@ -33,6 +33,7 @@ export interface PublicTable {
 
 export interface HandResult {
   winners: { id: number; name: string; amount: number }[];
+  participants?: number[];
   handName: string | null;
   winningCards: string[];
   showdown: boolean;
@@ -58,6 +59,7 @@ export interface ProfilePayload {
   handsWon: number;
   founder: boolean;
   founderNumber: number | null;
+  registered: boolean;
 }
 
 export interface AuthResult {

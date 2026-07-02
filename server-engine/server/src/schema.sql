@@ -43,3 +43,30 @@ DO $$ BEGIN
   CREATE UNIQUE INDEX IF NOT EXISTS uq_accounts_founder_number
     ON accounts (founder_number) WHERE founder_number IS NOT NULL;
 EXCEPTION WHEN others THEN NULL; END $$;
+
+-- ---------------------------------------------------------------------------
+-- AUTH — modular provider layer. An account owns progression; a provider row
+-- is one way to prove you own it ('password' now; discord/google/steam/wallet
+-- later are just more rows — no backend rewrite). Username uniqueness lives on
+-- UNIQUE(provider, provider_key) with provider_key = lowercased username.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS auth_providers (
+  id          SERIAL PRIMARY KEY,
+  account_id  INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  provider    TEXT NOT NULL,
+  provider_key TEXT NOT NULL,
+  secret      TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (provider, provider_key)
+);
+CREATE INDEX IF NOT EXISTS idx_auth_providers_account ON auth_providers(account_id);
+
+-- Server-side persistent sessions (opaque random tokens, 30-day sliding expiry)
+CREATE TABLE IF NOT EXISTS sessions (
+  token       TEXT PRIMARY KEY,
+  account_id  INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_seen   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at  TIMESTAMPTZ NOT NULL DEFAULT now() + interval '30 days'
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_account ON sessions(account_id);

@@ -525,3 +525,21 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 .founder-badge{font-family:'Press Start 2P';font-size:8px;color:var(--gold);border:1px solid var(--gold);border-radius:5px;padding:4px 7px;white-space:nowrap;text-shadow:0 0 6px rgba(255,206,74,.5);box-shadow:0 0 10px rgba(255,206,74,.25);animation:founderGlow 3s ease-in-out infinite}
 @keyframes founderGlow{0%,100%{box-shadow:0 0 8px rgba(255,206,74,.2)}50%{box-shadow:0 0 16px rgba(255,206,74,.45)}}
 .lb-founder{color:var(--gold);text-shadow:0 0 6px rgba(255,206,74,.5)}
+
+/* ---- native account UI (lobby) ---- */
+.acct-row{display:flex;align-items:center;gap:10px;margin-top:5px;flex-wrap:wrap}
+.acct-tag{font-size:10px;letter-spacing:.5px;color:var(--neon);opacity:.9}
+.acct-tag.guest{color:#b9a8d8;opacity:.75}
+.acct-link{background:none;border:none;color:var(--violet-bright,#c77dff);font:inherit;font-size:10px;letter-spacing:.6px;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px}
+.acct-link:hover{color:var(--neon)}
+.auth-panel{border:2px solid var(--panel-edge);border-radius:12px;padding:14px;margin:0 0 14px;background:linear-gradient(180deg,rgba(157,78,221,.10),rgba(5,3,12,.8));display:flex;flex-direction:column;gap:9px}
+.auth-tabs{display:flex;gap:8px}
+.auth-tabs button{flex:1;background:rgba(157,78,221,.08);border:1px solid var(--panel-edge);border-radius:8px;color:#b9a8d8;font:inherit;font-size:11px;letter-spacing:1px;padding:7px 0;cursor:pointer}
+.auth-tabs button.on{color:var(--neon);border-color:var(--neon);background:rgba(57,255,139,.07)}
+.auth-in{background:rgba(5,3,12,.85);border:1px solid var(--panel-edge);border-radius:8px;color:#efe6ff;font:inherit;font-size:13px;letter-spacing:1px;padding:10px 12px;outline:none}
+.auth-in:focus{border-color:var(--violet,#9d4edd);box-shadow:0 0 12px rgba(157,78,221,.35)}
+.auth-err{color:#ff5d7a;font-size:11px;letter-spacing:.5px}
+.auth-actions{display:flex;align-items:center;gap:12px}
+.auth-actions .gbtn{flex:1}
+.auth-note{font-size:10px;line-height:1.6;color:#b9a8d8;opacity:.85}
+.auth-note b{color:var(--gold,#ffce4a)}

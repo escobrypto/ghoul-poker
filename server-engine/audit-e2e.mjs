@@ -69,6 +69,11 @@ async function main() {
   notes.push(`accounts: A=${A.id} B=${B.id} C=${C.id}`);
 
   // A creates a private room; B and C join by code
+  // Register B as a real account BEFORE play — under the GENESIS rule
+  // (registered + finish 1 hand) B should get badge #1 after the first hand.
+  const reg = await new Promise((res) => B.sock.emit('auth:register', { username: 'AuditB', password: 'password123' }, res));
+  if (!reg.ok) problems.push(`REGISTER failed: ${reg.error}`);
+
   const code = await new Promise((res) => A.sock.emit('room:create', { isPublic: false }, (r) => res(r.code)));
   await new Promise((res) => B.sock.emit('room:join', { code }, res));
   await new Promise((res) => C.sock.emit('room:join', { code }, res));
@@ -112,8 +117,10 @@ async function main() {
   }
 
   // ---- founder
-  if (founderSeen) notes.push(`FOUNDER fired: ${founderSeen.name} -> #${founderSeen.num} at level ${founderSeen.level}`);
-  else problems.push('FOUNDER: nobody granted despite level-ups (check awardXp/grant path)');
+  if (founderSeen) {
+    notes.push(`GENESIS fired: ${founderSeen.name} -> #${founderSeen.num}`);
+    if (founderSeen.name !== 'AuditB') problems.push(`GENESIS went to unregistered player ${founderSeen.name}`);
+  } else problems.push('GENESIS: registered player finished hands but no badge (check grant path)');
 
   console.log('\n===== E2E AUDIT RESULT =====');
   notes.forEach((n) => console.log('  •', n));

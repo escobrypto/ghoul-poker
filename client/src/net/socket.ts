@@ -104,6 +104,37 @@ export class GhoulSocket {
   }
   private stopPing() { if (this.pingTimer) { clearInterval(this.pingTimer); this.pingTimer = null; } }
 
+  // ---- native accounts: Register → Login → Play ----
+  register(username: string, password: string, cb: (err: string | null) => void) {
+    this.sock.emit('auth:register', { username, password }, (r: any) => {
+      if (r?.ok) {
+        localStorage.setItem(TOKEN_KEY, r.token);          // session token replaces guest token
+        if (r.profile) { localStorage.setItem(NAME_KEY, r.profile.name); this.handlers.onProfile?.(r.profile); }
+        cb(null);
+      } else cb(r?.error || 'Registration failed');
+    });
+  }
+
+  login(username: string, password: string, cb: (err: string | null) => void) {
+    this.sock.emit('auth:login', { username, password }, (r: any) => {
+      if (r?.ok) {
+        localStorage.setItem(TOKEN_KEY, r.token);
+        if (r.profile) { localStorage.setItem(NAME_KEY, r.profile.name); this.handlers.onProfile?.(r.profile); }
+        cb(null);
+      } else cb(r?.error || 'Login failed');
+    });
+  }
+
+  logout() {
+    const token = localStorage.getItem(TOKEN_KEY);
+    // kill the server session, clear local identity, come back as a fresh guest
+    this.sock.emit('auth:logout', { token }, () => {});
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(NAME_KEY);
+    sessionStorage.removeItem('ghoul_room');
+    window.location.reload();
+  }
+
   // ---- actions (client → server) ----
   setName(name: string, cb?: (ok: boolean) => void) {
     localStorage.setItem(NAME_KEY, name);

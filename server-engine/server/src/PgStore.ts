@@ -16,8 +16,8 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import pg from 'pg';
-import type { Store, Account } from './Store.js';
-import { xpNeeded, sanitizeName, FOUNDER_LEVEL, FOUNDER_CAP } from './Store.js';
+import type { Store, Account, AuthOutcome } from './Store.js';
+import { xpNeeded, sanitizeName, FOUNDER_CAP, hashPassword, verifyPassword, newSessionToken } from './Store.js';
 import type { ProfilePayload } from './protocol.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -28,6 +28,7 @@ function rowToProfile(r: any): ProfilePayload {
     xpNeeded: xpNeeded(r.level), chips: Number(r.chips),
     handsPlayed: r.hands_played, handsWon: r.hands_won,
     founder: !!r.founder, founderNumber: r.founder_number ?? null,
+    registered: !!r.registered,
   };
 }
 
@@ -58,6 +59,17 @@ export class PgStore implements Store {
 
   async authenticate(token: string | undefined, name: string): Promise<Account> {
     if (token) {
+      // 1) registered session token (sliding 30-day expiry, no auto-rename)
+      const sess = await this.pool.query(
+        `SELECT a.* FROM sessions s JOIN accounts a ON a.id = s.account_id
+         WHERE s.token = $1 AND s.expires_at > now()`, [token]);
+      if (sess.rowCount) {
+        await this.pool.query(
+          `UPDATE sessions SET last_seen = now(), expires_at = now() + interval '30 days' WHERE token = $1`, [token]);
+        await this.pool.query('UPDATE accounts SET last_seen=now() WHERE id=$1', [sess.rows[0].id]);
+        return this.toAccount(sess.rows[0]);
+      }
+      // 2) legacy guest token
       const found = await this.pool.query('SELECT * FROM accounts WHERE token = $1', [token]);
       if (found.rowCount) {
         const a = found.rows[0];
@@ -90,8 +102,67 @@ export class PgStore implements Store {
   }
 
   async getProfile(id: number): Promise<ProfilePayload | null> {
-    const r = await this.pool.query('SELECT * FROM accounts WHERE id=$1', [id]);
+    const r = await this.pool.query(
+      `SELECT a.*, EXISTS(SELECT 1 FROM auth_providers p WHERE p.account_id = a.id) AS registered
+       FROM accounts a WHERE a.id=$1`, [id]);
     return r.rowCount ? rowToProfile(r.rows[0]) : null;
+  }
+
+  // ---- auth: modular provider layer ('password' today; more providers later) ----
+
+  async register(currentAccountId: number | null, username: string, password: string): Promise<AuthOutcome> {
+    const secret = await hashPassword(password);
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      let accountId = currentAccountId;
+      if (accountId != null) {
+        // upgrading a guest in place — keeps XP/level/badges. Refuse if already registered.
+        const has = await client.query('SELECT 1 FROM auth_providers WHERE account_id=$1 LIMIT 1', [accountId]);
+        if (has.rowCount) { await client.query('ROLLBACK'); return { ok: false, error: 'Already registered' }; }
+        const exists = await client.query('SELECT 1 FROM accounts WHERE id=$1', [accountId]);
+        if (!exists.rowCount) accountId = null;
+      }
+      if (accountId == null) {
+        const legacy = `gp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}`;
+        const ins = await client.query('INSERT INTO accounts (token, name) VALUES ($1,$2) RETURNING id', [legacy, username]);
+        accountId = Number(ins.rows[0].id);
+      }
+      // UNIQUE(provider, provider_key) is the single source of truth for username
+      // uniqueness — a concurrent duplicate registration loses cleanly here.
+      await client.query(
+        `INSERT INTO auth_providers (account_id, provider, provider_key, secret) VALUES ($1,'password',$2,$3)`,
+        [accountId, username.toLowerCase(), secret]);
+      await client.query('UPDATE accounts SET name=$1, last_seen=now() WHERE id=$2', [username, accountId]);
+      const sessionToken = newSessionToken();
+      await client.query('INSERT INTO sessions (token, account_id) VALUES ($1,$2)', [sessionToken, accountId]);
+      const acc = await client.query('SELECT * FROM accounts WHERE id=$1', [accountId]);
+      await client.query('COMMIT');
+      return { ok: true, account: this.toAccount(acc.rows[0]), sessionToken };
+    } catch (e: any) {
+      await client.query('ROLLBACK');
+      if (e?.code === '23505') return { ok: false, error: 'Username taken' };
+      throw e;
+    } finally {
+      client.release();
+    }
+  }
+
+  async login(username: string, password: string): Promise<AuthOutcome> {
+    const r = await this.pool.query(
+      `SELECT p.secret, a.* FROM auth_providers p JOIN accounts a ON a.id = p.account_id
+       WHERE p.provider='password' AND p.provider_key=$1`, [username.toLowerCase()]);
+    if (!r.rowCount || !(await verifyPassword(password, r.rows[0].secret))) {
+      return { ok: false, error: 'Wrong username or password' };
+    }
+    const sessionToken = newSessionToken();
+    await this.pool.query('INSERT INTO sessions (token, account_id) VALUES ($1,$2)', [sessionToken, r.rows[0].id]);
+    await this.pool.query('UPDATE accounts SET last_seen=now() WHERE id=$1', [r.rows[0].id]);
+    return { ok: true, account: this.toAccount(r.rows[0]), sessionToken };
+  }
+
+  async logout(sessionToken: string): Promise<void> {
+    await this.pool.query('DELETE FROM sessions WHERE token=$1', [sessionToken]);
   }
 
   async addXp(id: number, xp: number): Promise<ProfilePayload | null> {
@@ -141,9 +212,10 @@ export class PgStore implements Store {
   }
 
   /**
-   * Grant a founder number, race-safe. A transaction locks the count so two
-   * simultaneous level-ups can't both claim slot #100. Idempotent: an existing
-   * founder just returns their number. Only accounts at FOUNDER_LEVEL qualify.
+   * GENESIS GHOUL grant, race-safe + idempotent. Eligibility: a REGISTERED
+   * account (has an auth provider) that has finished at least one hand.
+   * The advisory lock single-files the count->grant sequence globally so the
+   * cap can never overshoot; the unique index on founder_number is the backstop.
    */
   async grantFounderIfEligible(id: number): Promise<number | null> {
     const client = await this.pool.connect();
@@ -154,11 +226,14 @@ export class PgStore implements Store {
       // slot #100. This advisory lock is held to COMMIT and makes the
       // count->grant sequence globally single-file.
       await client.query('SELECT pg_advisory_xact_lock(777001)');
-      const me = await client.query('SELECT founder, founder_number, level FROM accounts WHERE id=$1 FOR UPDATE', [id]);
+      const me = await client.query(
+        `SELECT founder, founder_number, hands_played,
+                EXISTS(SELECT 1 FROM auth_providers p WHERE p.account_id = accounts.id) AS registered
+         FROM accounts WHERE id=$1 FOR UPDATE`, [id]);
       if (!me.rowCount) { await client.query('ROLLBACK'); return null; }
       const row = me.rows[0];
       if (row.founder) { await client.query('COMMIT'); return row.founder_number; } // idempotent
-      if (row.level < FOUNDER_LEVEL) { await client.query('ROLLBACK'); return null; }
+      if (!row.registered || row.hands_played < 1) { await client.query('ROLLBACK'); return null; }
       // count existing founders under a lock to prevent overshooting the cap
       const cnt = await client.query('SELECT COUNT(*)::int AS n FROM accounts WHERE founder=true');
       const n = cnt.rows[0].n as number;

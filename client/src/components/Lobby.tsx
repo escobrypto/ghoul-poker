@@ -17,14 +17,34 @@ interface Props {
   onStart: () => void;
   onLeave: () => void;
   onSetName: (n: string) => void;
+  onRegister: (username: string, password: string, cb: (err: string | null) => void) => void;
+  onLogin: (username: string, password: string, cb: (err: string | null) => void) => void;
+  onLogout: () => void;
   fetchLeaderboard: (cb: (rows: LeaderRow[]) => void) => void;
 }
 
 export default function Lobby({
-  profile, room, conn, latency, onQuickplay, onCreate, onJoin, onReady, onStart, onLeave, onSetName, fetchLeaderboard,
+  profile, room, conn, latency, onQuickplay, onCreate, onJoin, onReady, onStart, onLeave, onSetName, onRegister, onLogin, onLogout, fetchLeaderboard,
 }: Props) {
   const [code, setCode] = useState('');
   const [tab, setTab] = useState<'play' | 'ranks' | 'friends'>('play');
+  // ---- auth panel state (Register → Login → Play; guests can keep playing) ----
+  const [authMode, setAuthMode] = useState<'closed' | 'register' | 'login'>('closed');
+  const [authUser, setAuthUser] = useState('');
+  const [authPass, setAuthPass] = useState('');
+  const [authErr, setAuthErr] = useState<string | null>(null);
+  const [authBusy, setAuthBusy] = useState(false);
+  const submitAuth = () => {
+    if (authBusy) return;
+    setAuthErr(null); setAuthBusy(true);
+    const done = (err: string | null) => {
+      setAuthBusy(false);
+      if (err) setAuthErr(err);
+      else { setAuthMode('closed'); setAuthUser(''); setAuthPass(''); }
+    };
+    if (authMode === 'register') onRegister(authUser.trim(), authPass, done);
+    else onLogin(authUser.trim(), authPass, done);
+  };
   const youId = profile?.id;
   const me = room?.players.find((p) => p.id === youId);
   const isHost = room?.hostId === youId;
@@ -79,10 +99,50 @@ export default function Lobby({
               <div className="name-row">
                 <input className="namein" defaultValue={profile.name} maxLength={16}
                   onBlur={(e) => onSetName(e.target.value.trim() || profile.name)} />
-                {profile.founder && <span className="founder-badge" title={`Founder #${profile.founderNumber}`}>👑 FOUNDER #{profile.founderNumber}</span>}
+                {profile.founder && <span className="founder-badge" title={`Genesis Ghoul #${profile.founderNumber}`}>👑 GENESIS #{profile.founderNumber}</span>}
               </div>
               <div className="lvl">LVL {profile.level} · {profile.xp}/{profile.xpNeeded} XP · ◈{profile.chips.toLocaleString()}</div>
+              <div className="acct-row">
+                {profile.registered ? (
+                  <>
+                    <span className="acct-tag">✔ ACCOUNT: {profile.name}</span>
+                    <button className="acct-link" onClick={onLogout}>LOG OUT</button>
+                  </>
+                ) : (
+                  <>
+                    <span className="acct-tag guest">GUEST — progress lives in this browser only</span>
+                    <button className="acct-link" onClick={() => { setAuthMode('register'); setAuthErr(null); }}>CREATE ACCOUNT</button>
+                    <button className="acct-link" onClick={() => { setAuthMode('login'); setAuthErr(null); }}>LOG IN</button>
+                  </>
+                )}
+              </div>
             </div>
+          </div>
+        )}
+
+        {authMode !== 'closed' && !profile?.registered && (
+          <div className="auth-panel">
+            <div className="auth-tabs">
+              <button className={authMode === 'register' ? 'on' : ''} onClick={() => { setAuthMode('register'); setAuthErr(null); }}>CREATE ACCOUNT</button>
+              <button className={authMode === 'login' ? 'on' : ''} onClick={() => { setAuthMode('login'); setAuthErr(null); }}>LOG IN</button>
+            </div>
+            <input className="auth-in" placeholder="USERNAME" value={authUser} maxLength={16} autoComplete="username"
+              onChange={(e) => setAuthUser(e.target.value)} />
+            <input className="auth-in" placeholder={authMode === 'register' ? 'PASSWORD (8+ CHARS)' : 'PASSWORD'} type="password" value={authPass} maxLength={72}
+              autoComplete={authMode === 'register' ? 'new-password' : 'current-password'}
+              onChange={(e) => setAuthPass(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') submitAuth(); }} />
+            {authErr && <div className="auth-err">{authErr}</div>}
+            <div className="auth-actions">
+              <button className="gbtn call" disabled={authBusy || authUser.trim().length < 3 || authPass.length < (authMode === 'register' ? 8 : 1)} onClick={submitAuth}>
+                {authBusy ? '...' : authMode === 'register' ? 'REGISTER & CLAIM YOUR GHOUL' : 'LOG IN'}
+              </button>
+              <button className="acct-link" onClick={() => setAuthMode('closed')}>CANCEL</button>
+            </div>
+            {authMode === 'register' && (
+              <div className="auth-note">Registering keeps everything you've earned in this browser — XP, level, badges.
+              👑 The first 100 registered ghouls to finish a hand become <b>GENESIS GHOULS</b>, forever.</div>
+            )}
           </div>
         )}
 

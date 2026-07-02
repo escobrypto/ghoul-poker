@@ -7,7 +7,37 @@
 // JWTs + a users table keyed by wallet or email.
 // ============================================================================
 
+import { randomBytes, scrypt as _scrypt, timingSafeEqual } from 'crypto';
+import { promisify } from 'util';
 import type { ProfilePayload } from './protocol.js';
+
+const scrypt = promisify(_scrypt) as (pw: string, salt: string, len: number) => Promise<Buffer>;
+
+// ---------------------------------------------------------------------------
+// Password hashing — Node built-in scrypt (memory-hard, no native deps, no new
+// packages, nothing to break on deploy). Stored as `scrypt:salt:hash` so the
+// algorithm can be migrated later by prefix.
+// ---------------------------------------------------------------------------
+export async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16).toString('hex');
+  const hash = await scrypt(password, salt, 64);
+  return `scrypt:${salt}:${hash.toString('hex')}`;
+}
+export async function verifyPassword(password: string, stored: string): Promise<boolean> {
+  const [algo, salt, hex] = (stored || '').split(':');
+  if (algo !== 'scrypt' || !salt || !hex) return false;
+  const test = await scrypt(password, salt, 64);
+  const want = Buffer.from(hex, 'hex');
+  return test.length === want.length && timingSafeEqual(test, want);
+}
+export function newSessionToken(): string {
+  return `gs_${randomBytes(24).toString('hex')}`;
+}
+
+/** Result of register/login. */
+export type AuthOutcome =
+  | { ok: true; account: Account; sessionToken: string }
+  | { ok: false; error: string };
 
 export interface Account {
   id: number;
@@ -24,10 +54,11 @@ export interface Account {
 
 export function xpNeeded(level: number) { return 100 + (level - 1) * 120; }
 
-// The founder program: the first 100 accounts to REACH LEVEL 2 (i.e. actually
-// play, not just load the page) get a permanent founder badge numbered 1..100.
+// GENESIS GHOUL — the founder program. The first 100 REGISTERED accounts that
+// finish at least one hand get a permanent numbered badge (1..100). Requiring
+// registration + a completed hand means real players, not bot farms; requiring
+// only 100 keeps it the rarest cosmetic in the game, exclusive forever.
 export const FOUNDER_CAP = 100;
-export const FOUNDER_LEVEL = 2;
 
 // Name validation shared by both stores. Keeps names sane + non-empty.
 export function sanitizeName(name: string | undefined, fallback: string): string {
@@ -42,8 +73,14 @@ export interface Store {
   recordHand(id: number, won: boolean, chipDelta: number): Promise<void>;
   leaderboard(limit: number): Promise<LeaderRow[]>;
   setName(id: number, name: string): Promise<ProfilePayload | null>;
-  /** grant founder # to an eligible account (race-safe, idempotent). returns number or null */
+  /** grant a GENESIS number to an eligible account (race-safe, idempotent). returns number or null */
   grantFounderIfEligible(id: number): Promise<number | null>;
+
+  // ---- auth (modular provider layer: 'password' today, discord/google/steam/wallet later) ----
+  /** create a registered account, or upgrade the given guest account in place (keeps XP/badges) */
+  register(currentAccountId: number | null, username: string, password: string): Promise<AuthOutcome>;
+  login(username: string, password: string): Promise<AuthOutcome>;
+  logout(sessionToken: string): Promise<void>;
 }
 
 type LeaderRow = { id: number; name: string; level: number; xp: number; handsWon: number; founder: boolean; founderNumber: number | null };
@@ -53,8 +90,16 @@ export class MemoryStore implements Store {
   private byToken = new Map<string, number>();
   private seq = 1000;
   private founderCount = 0;
+  // auth layer (mirrors the auth_providers + sessions tables in PgStore)
+  private providers = new Map<string, { accountId: number; secret: string }>(); // key: 'password:'+lower(username)
+  private sessions = new Map<string, number>();      // session token -> account id
+  private registered = new Set<number>();
 
   async authenticate(token: string | undefined, name: string): Promise<Account> {
+    // registered session tokens win; registered accounts are never auto-renamed
+    if (token && this.sessions.has(token)) {
+      return this.byId.get(this.sessions.get(token)!)!;
+    }
     if (token && this.byToken.has(token)) {
       const acc = this.byId.get(this.byToken.get(token)!)!;
       const clean = sanitizeName(name, acc.name);
@@ -77,12 +122,37 @@ export class MemoryStore implements Store {
     return this.getProfile(id);
   }
 
+  async register(currentAccountId: number | null, username: string, password: string): Promise<AuthOutcome> {
+    const key = `password:${username.toLowerCase()}`;
+    if (this.providers.has(key)) return { ok: false, error: 'Username taken' };
+    let acc = currentAccountId != null ? this.byId.get(currentAccountId) : undefined;
+    if (acc && this.registered.has(acc.id)) return { ok: false, error: 'Already registered' };
+    if (!acc) acc = await this.authenticate(undefined, username); // fresh account
+    acc.name = username;
+    this.providers.set(key, { accountId: acc.id, secret: await hashPassword(password) });
+    this.registered.add(acc.id);
+    const sessionToken = newSessionToken();
+    this.sessions.set(sessionToken, acc.id);
+    return { ok: true, account: acc, sessionToken };
+  }
+
+  async login(username: string, password: string): Promise<AuthOutcome> {
+    const p = this.providers.get(`password:${username.toLowerCase()}`);
+    if (!p || !(await verifyPassword(password, p.secret))) return { ok: false, error: 'Wrong username or password' };
+    const sessionToken = newSessionToken();
+    this.sessions.set(sessionToken, p.accountId);
+    return { ok: true, account: this.byId.get(p.accountId)!, sessionToken };
+  }
+
+  async logout(sessionToken: string): Promise<void> { this.sessions.delete(sessionToken); }
+
   async getProfile(id: number): Promise<ProfilePayload | null> {
     const a = this.byId.get(id); if (!a) return null;
     return {
       id: a.id, name: a.name, level: a.level, xp: a.xp, xpNeeded: xpNeeded(a.level),
       chips: a.chips, handsPlayed: a.handsPlayed, handsWon: a.handsWon,
       founder: a.founder, founderNumber: a.founderNumber,
+      registered: this.registered.has(a.id),
     };
   }
 
@@ -95,9 +165,10 @@ export class MemoryStore implements Store {
 
   async grantFounderIfEligible(id: number): Promise<number | null> {
     const a = this.byId.get(id); if (!a) return null;
-    if (a.founder) return a.founderNumber;                 // idempotent
-    if (a.level < FOUNDER_LEVEL) return null;              // must have played to L2
-    if (this.founderCount >= FOUNDER_CAP) return null;     // slots full
+    if (a.founder) return a.founderNumber;                       // idempotent
+    if (!this.registered.has(id)) return null;                   // GENESIS: registered accounts only
+    if (a.handsPlayed < 1) return null;                          // ...that finished a real hand
+    if (this.founderCount >= FOUNDER_CAP) return null;           // slots full — exclusive forever
     this.founderCount++;
     a.founder = true; a.founderNumber = this.founderCount;
     return a.founderNumber;

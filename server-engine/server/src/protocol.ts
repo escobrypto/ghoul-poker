@@ -41,6 +41,8 @@ export interface PublicTable {
 /** Result of a finished hand, for the win cinematic + history. */
 export interface HandResult {
   winners: { id: number; name: string; amount: number }[];
+  /** account ids dealt into the hand (stats + GENESIS credit) */
+  participants?: number[];
   handName: string | null; // null when everyone folded
   winningCards: string[];
   showdown: boolean;
@@ -59,6 +61,9 @@ export interface RoomInfo {
 // ---- client → server events ----
 export interface ClientToServer {
   'auth': (p: { token?: string; name: string }, ack: (r: AuthResult) => void) => void;
+  'auth:register': (p: { username: string; password: string }, ack: (r: AuthResult | { error: string }) => void) => void;
+  'auth:login': (p: { username: string; password: string }, ack: (r: AuthResult | { error: string }) => void) => void;
+  'auth:logout': (p: { token: string }, ack?: (r: { ok: boolean }) => void) => void;
   'room:create': (p: { isPublic: boolean }, ack: (r: { code: string } | { error: string }) => void) => void;
   'room:join': (p: { code: string }, ack: (r: { ok: true } | { error: string }) => void) => void;
   'room:quickplay': (ack: (r: { code: string } | { error: string }) => void) => void;
@@ -100,6 +105,7 @@ export interface ProfilePayload {
   chips: number;       // persistent play-money bank
   handsPlayed: number;
   handsWon: number;
-  founder: boolean;        // one of the first 100 participants
+  founder: boolean;        // GENESIS GHOUL — one of the first 100 registered players
   founderNumber: number | null; // 1..100
+  registered: boolean;     // has a real account (username/password or future providers)
 }

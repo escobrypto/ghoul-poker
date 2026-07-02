@@ -111,6 +111,9 @@ export class GameRoom {
     this.startHand();
   }
 
+  /** account ids dealt into the current hand — stats + GENESIS credit go to these */
+  private dealtIds: number[] = [];
+
   // ---- the authoritative hand loop ----
   private startHand() {
     const seated = this.members.map((m) => ({ id: m.id, name: m.name, stack: m.stack }));
@@ -118,6 +121,7 @@ export class GameRoom {
     // this is a fun-first social game, not real-stakes; nobody gets stuck out)
     seated.forEach((s) => { if (s.stack < BB) s.stack = START_STACK; });
 
+    this.dealtIds = seated.map((s) => s.id);
     this.handNo++;
     const button = this.handNo % seated.length;
     this.state = createTable(seated, button);
@@ -239,6 +243,7 @@ export class GameRoom {
     this.emit.handResult({
       // exact chips each player received (side pots + uncalled-bet refunds)
       winners: r.payouts,
+      participants: this.dealtIds,
       handName: r.handName, winningCards: r.winningCards, showdown: true,
     });
     this.scheduleNextHand();
@@ -254,6 +259,7 @@ export class GameRoom {
     this.pushState();
     this.emit.handResult({
       winners: [{ id: w.id, name: w.name, amount: potSize }],
+      participants: this.dealtIds,
       handName: null, winningCards: [], showdown: false,
     });
     this.scheduleNextHand();

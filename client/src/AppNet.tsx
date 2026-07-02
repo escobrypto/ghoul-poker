@@ -38,6 +38,9 @@ export default function AppNet() {
           onStart={() => g.startGame()}
           onLeave={() => g.leaveRoom()}
           onSetName={(n) => g.setName(n)}
+          onRegister={g.register}
+          onLogin={g.login}
+          onLogout={g.logout}
           fetchLeaderboard={g.fetchLeaderboard}
         />
       ) : (

@@ -63,24 +63,40 @@ function emitFactoryFor(code: string) {
   };
 }
 
-// award XP + record stats when a hand resolves (persistence side-effect)
+// award XP + record stats when a hand resolves (persistence side-effect).
+// EVERY dealt player gets hands_played credit (stats + GENESIS eligibility);
+// winners additionally earn XP.
 async function awardXp(code: string, result: any) {
   try {
-  for (const w of result.winners) {
-    await store.addXp(w.id, result.showdown ? 70 : 45);
-    await store.recordHand(w.id, true, 0);
-    // founder program: first 100 to reach level 2 get a permanent badge.
-    // race-safe + idempotent inside the store; safe to call every time.
-    await store.grantFounderIfEligible(w.id);
-    const prof = await store.getProfile(w.id);
-    const sid = liveSocket.get(w.id);
-    if (prof && sid) io.to(sid).emit('profile', prof);
-  }
+    const winnerIds = new Set<number>(result.winners.map((w: any) => w.id));
+    const participants: number[] = result.participants ?? [...winnerIds];
+    for (const id of participants) {
+      await store.recordHand(id, winnerIds.has(id), 0);
+      if (winnerIds.has(id)) await store.addXp(id, result.showdown ? 70 : 45);
+      // GENESIS GHOUL: first 100 registered accounts to finish a hand.
+      // race-safe + idempotent inside the store; safe to call every time.
+      await store.grantFounderIfEligible(id);
+      const prof = await store.getProfile(id);
+      const sid = liveSocket.get(id);
+      if (prof && sid) io.to(sid).emit('profile', prof);
+    }
   } catch (e) {
     // A transient store error must never take the process (and every table) down.
     console.error('awardXp failed (non-fatal):', e);
   }
 }
+
+// ---- auth guardrails: small in-memory attempt limiter (5/min per socket+name) ----
+const authAttempts = new Map<string, { n: number; reset: number }>();
+function allowAuthAttempt(key: string): boolean {
+  const now = Date.now();
+  const a = authAttempts.get(key);
+  if (!a || now > a.reset) { authAttempts.set(key, { n: 1, reset: now + 60_000 }); return true; }
+  if (a.n >= 5) return false;
+  a.n++; return true;
+}
+setInterval(() => { const now = Date.now(); for (const [k, v] of authAttempts) if (now > v.reset) authAttempts.delete(k); }, 120_000).unref();
+const USERNAME_RE = /^[A-Za-z0-9_]{3,16}$/;
 
 io.on('connection', (socket) => {
   socket.on('auth', async ({ token, name }, ack) => {
@@ -89,6 +105,53 @@ io.on('connection', (socket) => {
     liveSocket.set(acc.id, socket.id);
     const profile = await store.getProfile(acc.id);
     ack({ ok: true, token: acc.token, profile: profile ?? undefined });
+  });
+
+  // ---- native accounts: Register → Login → Play ----
+  socket.on('auth:register', async (p: any, ack: any) => {
+    try {
+      const username = String(p?.username ?? '').trim();
+      const password = String(p?.password ?? '');
+      if (!allowAuthAttempt(`r:${socket.id}`)) return ack({ error: 'Too many attempts — wait a minute' });
+      if (!USERNAME_RE.test(username)) return ack({ error: 'Username must be 3–16 letters, numbers, or _' });
+      if (password.length < 8 || password.length > 72) return ack({ error: 'Password must be at least 8 characters' });
+      const cur = sessions.get(socket.id);
+      const r = await store.register(cur?.accountId ?? null, username, password);
+      if (!r.ok) return ack({ error: r.error });
+      sessions.set(socket.id, { accountId: r.account.id, name: r.account.name });
+      liveSocket.set(r.account.id, socket.id);
+      // a guest who already finished hands may qualify for GENESIS the moment they register
+      await store.grantFounderIfEligible(r.account.id);
+      const profile = await store.getProfile(r.account.id);
+      ack({ ok: true, token: r.sessionToken, profile: profile ?? undefined });
+    } catch (e) {
+      console.error('register failed:', e);
+      ack({ error: 'Registration failed — try again' });
+    }
+  });
+
+  socket.on('auth:login', async (p: any, ack: any) => {
+    try {
+      const username = String(p?.username ?? '').trim();
+      const password = String(p?.password ?? '');
+      if (!allowAuthAttempt(`l:${socket.id}`) || !allowAuthAttempt(`u:${username.toLowerCase()}`)) {
+        return ack({ error: 'Too many attempts — wait a minute' });
+      }
+      const r = await store.login(username, password);
+      if (!r.ok) return ack({ error: r.error });
+      sessions.set(socket.id, { accountId: r.account.id, name: r.account.name });
+      liveSocket.set(r.account.id, socket.id);
+      const profile = await store.getProfile(r.account.id);
+      ack({ ok: true, token: r.sessionToken, profile: profile ?? undefined });
+    } catch (e) {
+      console.error('login failed:', e);
+      ack({ error: 'Login failed — try again' });
+    }
+  });
+
+  socket.on('auth:logout', async (p: any, ack: any) => {
+    try { if (p?.token) await store.logout(String(p.token)); } catch { /* non-fatal */ }
+    ack?.({ ok: true });
   });
 
   socket.on('room:create', ({ isPublic }, ack) => {

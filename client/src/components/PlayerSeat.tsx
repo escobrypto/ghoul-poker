@@ -48,7 +48,7 @@ export default function PlayerSeat({
   return (
     <div
       className={`seat${player.you ? ' you' : ''}${player.folded ? ' folded' : ''}${isActive ? ' active' : ''}${isWinner ? ' winner' : ''}${isButton ? ' has-button' : ''}${allIn ? ' allin' : ''}`}
-      style={{ left: `${pos.x}%`, top: `${pos.y}%`, ['--flame' as string]: flame }}
+      style={{ left: `${pos.x}%`, top: `${pos.y}%`, ['--flame' as string]: flame, ['--depth' as string]: (0.86 + (pos.y / 100) * 0.22).toFixed(3) }}
     >
       {winBurstXp != null && <div className="winburst">+{winBurstXp} XP</div>}
       <div className="pod">

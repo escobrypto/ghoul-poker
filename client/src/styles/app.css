@@ -137,7 +137,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 
 /* --- TABLE: dominant, textured, deep --- */
 .table-shadow{position:absolute;left:50%;top:60%;transform:translate(-50%,-50%);width:1060px;height:400px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.75),transparent 72%);z-index:7;filter:blur(8px)}
-.felt{position:absolute;left:50%;top:57%;transform:translate(-50%,-50%);width:1020px;height:460px;border-radius:50%/46%;z-index:8}
+.felt{position:absolute;left:50%;top:57%;transform:translate(-50%,-50%);width:1020px;height:460px;border-radius:50%/46%;z-index:8;
+  box-shadow:0 16px 0 -6px #170b2b,0 22px 0 -8px #0d0619,0 40px 46px -18px rgba(0,0,0,.85)}
 .felt-surface{position:absolute;inset:0;border-radius:50%/46%;background:url('/assets/backgrounds/felt.png'),radial-gradient(closest-side,#241640,#160c28 70%,#100819);background-size:200px,cover;background-blend-mode:overlay;image-rendering:pixelated}
 .felt-rail{position:absolute;inset:-14px;border-radius:50%/46%;z-index:-1;background:linear-gradient(180deg,#3a2456,#1a0f2e);box-shadow:0 14px 30px rgba(0,0,0,.7),inset 0 2px 6px rgba(199,125,255,.3),inset 0 -6px 12px rgba(0,0,0,.6)}
 .felt-rim{position:absolute;inset:-2px;border-radius:50%/46%;pointer-events:none;border:3px solid rgba(157,78,221,.6);box-shadow:0 0 26px var(--violet),inset 0 0 40px rgba(157,78,221,.35),inset 0 0 18px rgba(57,255,139,.12);animation:rimpulse 3s infinite}
@@ -157,7 +158,10 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .pot-lbl{font-family:'Press Start 2P';font-size:11px;color:var(--violet-b);letter-spacing:1px;text-shadow:0 0 6px var(--violet)}
 .pot-amt{font-family:'Press Start 2P';font-size:26px;color:var(--gold);text-shadow:0 0 16px rgba(255,206,74,.8),0 2px 0 #000;margin-top:5px;animation:potpulse 2s infinite}
 @keyframes potpulse{0%,100%{text-shadow:0 0 12px rgba(255,206,74,.6),0 2px 0 #000}50%{text-shadow:0 0 26px rgba(255,206,74,1),0 2px 0 #000}}
-.community{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);display:flex;gap:13px;z-index:20}
+.community{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);display:flex;gap:13px;z-index:20;perspective:900px}
+.community::before{content:"";position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:112%;height:130%;background:radial-gradient(50% 42% at 50% 60%,rgba(0,0,0,.55),transparent 70%);z-index:-1;filter:blur(6px)}
+.community .cardwrap{transform:rotateX(7deg)}
+.community .cardwrap .cardface{box-shadow:0 14px 14px -8px rgba(0,0,0,.65),0 0 12px var(--suitglow,rgba(0,0,0,.4)),inset 0 0 0 1px rgba(255,255,255,.05)}
 
 /* glowing chip stacks in the pot */
 .potchips{position:absolute;left:50%;top:20%;transform:translateX(-50%);display:flex;gap:7px;z-index:3;align-items:center}
@@ -178,7 +182,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .scene-vignette{position:absolute;inset:0;z-index:20;pointer-events:none;background:radial-gradient(120% 100% at 50% 45%,transparent 50%,rgba(5,2,12,.55) 88%,rgba(3,1,8,.85) 100%)}
 
 /* seats sit above scene */
-.seat{/* widened for Card v2 */position:absolute;width:198px;transform:translate(-50%,-50%);text-align:center;z-index:15}
+.seat{/* widened for Card v2 */position:absolute;width:198px;transform:translate(-50%,-50%) scale(var(--depth,1));text-align:center;z-index:15}
 .seat .pod{border:2px solid var(--panel-edge);border-radius:12px;padding:0 8px 9px;position:relative;background:linear-gradient(180deg,rgba(16,10,30,.9),rgba(6,4,14,.95));transition:.25s;box-shadow:0 8px 18px rgba(0,0,0,.6)}
 .seat.active .pod{border-color:var(--neon);box-shadow:0 0 24px rgba(57,255,139,.6),0 8px 18px rgba(0,0,0,.6)}
 .seat.winner .pod{border-color:var(--gold);box-shadow:0 0 26px rgba(255,206,74,.7),0 8px 18px rgba(0,0,0,.6)}
@@ -245,8 +249,10 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .cardface.front.win{outline:2px solid var(--gold);box-shadow:0 0 20px var(--gold),0 0 40px rgba(255,206,74,.5)!important;animation:winp .9s infinite}
 @keyframes winp{0%,100%{box-shadow:0 0 14px var(--gold),0 0 28px rgba(255,206,74,.4)}50%{box-shadow:0 0 28px var(--gold),0 0 52px rgba(255,206,74,.7)}}
 /* folded player's cards dim + tilt */
-.cardwrap.dimmed{filter:grayscale(.6) brightness(.55);transform:rotate(-6deg) translateY(2px);transition:.3s}
-.cardwrap.dimmed:nth-child(2){transform:rotate(5deg) translateY(2px)}
+.seat.you .holecards .cardwrap.mine:first-child{transform:rotate(-3.5deg) translateY(2px)}
+.seat.you .holecards .cardwrap.mine:last-child{transform:rotate(3.5deg)}
+.cardwrap.dimmed{filter:grayscale(.6) brightness(.55);transform:rotate(-6deg) translateY(2px) !important;transition:.3s}
+.cardwrap.dimmed:nth-child(2){transform:rotate(5deg) translateY(2px) !important}
 
 /* deck stack near dealer */
 .deck-stack{position:absolute;width:30px;height:42px;transform:translate(-50%,-50%);z-index:9;pointer-events:none}
@@ -587,7 +593,7 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 .cardwrap.mine .faceletter{font-size:29px}
 .cardwrap.mine .facesuit{width:23px}
 /* your seat: one unified panel — name / stack / bar / cards, avatar above (mock) */
-.seat.you{width:236px;transform:translate(-50%,-50%);margin-top:18px}
+.seat.you{width:236px;transform:translate(-50%,-50%) scale(1.05);margin-top:18px}
 .seat.you .pod{border-width:1.5px;border-radius:14px;padding:0 10px 12px}
 .seat.you .spritebox{height:78px;margin-top:-40px}
 .seat.you .spritebox .ghoul-img{width:92px;max-height:100px}

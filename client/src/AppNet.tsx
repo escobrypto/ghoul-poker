@@ -1,3 +1,4 @@
+import { useState } from 'react';
 // Networked App — the production multiplayer client. Switches between the Lobby
 // and the live table based on whether a started room exists. The table scene and
 // all its components are UNCHANGED; only the data source moved to the server.
@@ -15,6 +16,8 @@ import './styles/app.css';
 export default function AppNet() {
   const sound = useSoundEffects();
   const g = useGhoulNet(sound.play);
+  const [showChat, setShowChat] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const inGame = !!g.room?.started && g.state.players.length > 0;
 
@@ -47,7 +50,7 @@ export default function AppNet() {
           fetchLeaderboard={g.fetchLeaderboard}
         />
       ) : (
-        <div className="app">
+        <div className="app app-immersive">
           <header className="topbar net-topbar">
             <div className="brand">
               <div className="sigil">GG</div>
@@ -58,10 +61,6 @@ export default function AppNet() {
             </div>
             <button className="gbtn fold leave-btn" onClick={() => g.leaveRoom()}>LEAVE TABLE</button>
           </header>
-
-          <aside className="left">
-            <ChatPanel chat={g.chat} onSend={g.sendChat} onEmote={(e) => g.sendChat(e)} />
-          </aside>
 
           <main className="center">
             <div className="table-area">
@@ -90,9 +89,25 @@ export default function AppNet() {
             />
           </main>
 
-          <aside className="right">
-            <HistoryPanel history={g.history} />
-          </aside>
+          {/* AAA mode: the table IS the screen — chat/history are popouts */}
+          <button className={`overlay-toggle chat-toggle${showChat ? ' on' : ''}`} onClick={() => setShowChat((v) => !v)}>
+            CHAT 💬
+          </button>
+          {showChat && (
+            <div className="overlay chat-overlay">
+              <button className="overlay-close" onClick={() => setShowChat(false)}>✕</button>
+              <ChatPanel chat={g.chat} onSend={g.sendChat} onEmote={(e) => g.sendChat(e)} />
+            </div>
+          )}
+          <button className={`overlay-toggle history-toggle${showHistory ? ' on' : ''}`} onClick={() => setShowHistory((v) => !v)}>
+            ☠ HISTORY
+          </button>
+          {showHistory && (
+            <div className="overlay history-overlay">
+              <button className="overlay-close" onClick={() => setShowHistory(false)}>✕</button>
+              <HistoryPanel history={g.history} />
+            </div>
+          )}
         </div>
       )}
 

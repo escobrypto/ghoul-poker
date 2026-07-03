@@ -12,7 +12,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .fx-confetti{position:fixed;inset:0;z-index:8500;pointer-events:none}
 
 .app{position:relative;z-index:2;display:grid;gap:12px;padding:12px;grid-template-columns:1fr;max-width:1820px;margin:0 auto}
-@media(min-width:1180px){.app{grid-template-columns:266px 1fr 286px;grid-template-rows:auto 1fr;grid-template-areas:"top top top" "left center right";min-height:100vh}}
+@media(min-width:1180px){.app{grid-template-columns:266px 1fr 286px;grid-template-rows:auto 1fr;grid-template-areas:"top top top" "left center right";min-height:100vh}
+.app.app-immersive{grid-template-columns:1fr;grid-template-areas:"top" "center"}}
 .topbar{grid-area:top}.left{grid-area:left}.center{grid-area:center}.right{grid-area:right}
 
 /* top bar */
@@ -564,3 +565,33 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 .seatrow.addbot:hover{color:var(--neon);border-color:var(--neon)}
 .botx{margin-left:auto;background:none;border:1px solid var(--panel-edge);border-radius:6px;color:#ff5d7a;font:inherit;font-size:11px;line-height:1;padding:4px 7px;cursor:pointer}
 .botx:hover{border-color:#ff5d7a}
+
+/* ---- AAA immersive mode: table first, panels as popouts ---- */
+.overlay-toggle{position:fixed;z-index:60;background:rgba(12,7,22,.9);border:1.5px solid var(--panel-edge);border-radius:10px;color:var(--ink);font-family:'Press Start 2P';font-size:10px;letter-spacing:1px;padding:10px 14px;cursor:pointer;transition:.15s;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.overlay-toggle:hover,.overlay-toggle.on{border-color:var(--violet);color:var(--violet-b)}
+.chat-toggle{left:16px;bottom:128px}
+.history-toggle{right:16px;top:70px}
+.overlay{position:fixed;z-index:59;background:rgba(9,5,18,.94);border:2px solid var(--panel-edge);border-radius:14px;box-shadow:0 12px 44px rgba(0,0,0,.65);backdrop-filter:blur(5px);padding:12px}
+.chat-overlay{left:16px;bottom:178px;width:330px}
+.chat-overlay .chatlog{height:230px}
+.history-overlay{right:16px;top:118px;width:300px;max-height:460px;overflow-y:auto}
+.overlay-close{position:absolute;top:8px;right:10px;z-index:2;background:none;border:none;color:var(--ink-dim);font-size:15px;cursor:pointer}
+.overlay-close:hover{color:#ff5d7a}
+.overlay .panel{border:none;background:transparent;box-shadow:none;padding:0}
+
+/* ---- hero treatment: the local player's hand ---- */
+.cardwrap.mine{width:82px;height:116px}
+.cardwrap.mine .cardface{border-width:2px}
+.cardwrap.mine .cardface.front{box-shadow:0 0 16px var(--suitglow),0 0 34px var(--suitglow),inset 0 0 0 1px rgba(255,255,255,.09),0 8px 16px rgba(0,0,0,.6)}
+.cardwrap.mine .cardface.front .idx b{font-size:27px}
+.cardwrap.mine .cardface.front .idx img{width:14px}
+.cardwrap.mine .pip{width:21px}
+.cardwrap.mine .acepip{width:48px}
+.cardwrap.mine .faceletter{font-size:34px}
+.cardwrap.mine .facesuit{width:27px}
+/* your seat: compact plate, cards drop below it with room to breathe */
+.seat.you{width:262px;transform:translate(-50%,-60%)}
+.seat.you .pod{border-width:1.5px;padding-bottom:0;background:linear-gradient(180deg,rgba(16,10,30,.82),rgba(6,4,14,.6) 78%,transparent)}
+.seat.you .spritebox{margin-top:-72px}
+.seat.you .holecards{margin-top:14px;gap:10px;min-height:120px;transform:translateY(12px)}
+.seat.you.active .pod{border-color:var(--neon);box-shadow:0 0 20px rgba(57,255,139,.45)}

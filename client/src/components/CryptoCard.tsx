@@ -4,6 +4,7 @@ import { Suit } from '../engine/poker';
 interface Props {
   card?: string;
   big?: boolean;
+  mine?: boolean;        // local player's hole cards — the hero of the table
   faceUp?: boolean;      // should this card reveal its face?
   win?: boolean;
   dimmed?: boolean;      // folded player's cards tilt + dim
@@ -39,7 +40,7 @@ const PIPS: Record<string, Pip[]> = {
 };
 
 export default function CryptoCard({
-  card, big, faceUp = true, win, dimmed, dealIndex = 0, onFlip,
+  card, big, mine, faceUp = true, win, dimmed, dealIndex = 0, onFlip,
 }: Props) {
   const [flipped, setFlipped] = useState(false);
   const flipFired = useRef(false);
@@ -55,7 +56,7 @@ export default function CryptoCard({
     return () => clearTimeout(t);
   }, [card, faceUp, dealIndex, onFlip]);
 
-  if (!card) return <div className={`cardwrap${big ? ' big' : ''}`} />;
+  if (!card) return <div className={`cardwrap${big ? ' big' : ''}${mine ? ' mine' : ''}`} />;
 
   const r = card[0];
   const s = card[1] as Suit;
@@ -68,7 +69,7 @@ export default function CryptoCard({
 
   return (
     <div
-      className={`cardwrap${big ? ' big' : ''}${dimmed ? ' dimmed' : ''}`}
+      className={`cardwrap${big ? ' big' : ''}${mine ? ' mine' : ''}${dimmed ? ' dimmed' : ''}`}
       style={{ ['--di' as string]: dealIndex }}
     >
       <div className={`card3d${showFront ? ' flipped' : ''}`}>

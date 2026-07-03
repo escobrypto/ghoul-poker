@@ -66,6 +66,7 @@ export default function PlayerSeat({
             <CryptoCard
               key={i}
               card={c}
+              mine={player.you}
               faceUp={reveal}
               win={winningCards.includes(c)}
               dimmed={player.folded}

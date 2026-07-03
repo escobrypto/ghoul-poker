@@ -5,7 +5,10 @@ v1.0 = "a polished, addictive multiplayer poker game." Every screen
 intentional, every interaction polished, codebase modular. Quality over
 quantity. Ship the premium feel FIRST; systems plug in after.
 
-Last updated: NATIVE AUTH + GENESIS GHOUL SHIPPED (auth 12/12, PG 20/20, full
+Last updated: IMMERSIVE PASS shipped — full-screen stage (chat/history are
+popout overlays), hero treatment for the local player's hand (82x116 cards,
+brighter neon, compact plate, cards breathe below it). Visual hierarchy now:
+board > your hand > pot > opponents. Earlier: NATIVE AUTH + GENESIS GHOUL SHIPPED (auth 12/12, PG 20/20, full
 gameplay E2E green over production config). P1 stage architecture still awaits
 Esco's visual QA before P2 (cosmetic framework) begins.
 

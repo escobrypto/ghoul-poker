@@ -18,6 +18,14 @@ interface Props {
 // sheet art for suit glyphs and the skull card back. Face art (A/K/Q/J
 // renders) drops in later without touching this component's logic.
 // ---------------------------------------------------------------------------
+// clean bold silhouettes for pips/indices — ornate art only where it's BIG (ace centers)
+const SUIT_PATH: Record<string, string> = {
+  h: 'M50 90 C22 64 6 45 6 29 C6 15 17 6 30 6 C39 6 47 11 50 19 C53 11 61 6 70 6 C83 6 94 15 94 29 C94 45 78 64 50 90 Z',
+  d: 'M50 4 L90 50 L50 96 L10 50 Z',
+  s: 'M50 4 C66 26 90 40 90 60 C90 74 80 83 68 83 C62 83 56 80 53 75 C54 83 58 90 64 96 L36 96 C42 90 46 83 47 75 C44 80 38 83 32 83 C20 83 10 74 10 60 C10 40 34 26 50 4 Z',
+  c: 'M50 8 a15 15 0 1 0 0.1 0 Z M29 42 a15 15 0 1 0 0.1 0 Z M71 42 a15 15 0 1 0 0.1 0 Z M45 56 C45 72 41 84 34 93 L66 93 C59 84 55 72 55 56 Z',
+};
+
 const SUITS: Record<string, { img: string; color: string; glow: string }> = {
   s: { img: '/assets/cards/suit-spade.png',   color: '#b06dff', glow: 'rgba(157,78,221,.55)' },
   h: { img: '/assets/cards/suit-heart.png',   color: '#ff4d6d', glow: 'rgba(255,77,109,.5)' },
@@ -80,18 +88,18 @@ export default function CryptoCard({
             className={`cardface front${win ? ' win' : ''}`}
             style={{ ['--suit' as string]: suit.color, ['--suitglow' as string]: suit.glow }}
           >
-            <span className="idx"><b>{rank}</b><img src={suit.img} alt="" /></span>
-            <span className="idx br"><b>{rank}</b><img src={suit.img} alt="" /></span>
+            <span className="idx"><b>{rank}</b><svg viewBox="0 0 100 100"><path d={SUIT_PATH[s as string]} fill={suit.color} /></svg></span>
+            <span className="idx br"><b>{rank}</b><svg viewBox="0 0 100 100"><path d={SUIT_PATH[s as string]} fill={suit.color} /></svg></span>
 
             {pips && (
               <svg className="pipsvg" viewBox="0 0 100 140" preserveAspectRatio="none">
                 {pips.map(([x, y, rot], i) => {
                   const cx = 15 + 70 * (x / 100);
                   const cy = 18 + 104 * (y / 100);
+                  const t = `translate(${(cx - 9).toFixed(1)} ${(cy - 10).toFixed(1)}) scale(0.18 0.20)`;
                   return (
-                    <image key={i} href={suit.img} x={cx - 9.5} y={cy - 10.5} width="19" height="21"
-                      preserveAspectRatio="xMidYMid meet"
-                      transform={rot ? `rotate(180 ${cx} ${cy})` : undefined} />
+                    <path key={i} d={SUIT_PATH[s as string]} fill={suit.color}
+                      transform={rot ? `rotate(180 ${cx} ${cy}) ${t}` : t} />
                   );
                 })}
               </svg>
@@ -104,7 +112,7 @@ export default function CryptoCard({
             {isFace && (
               <div className="facecenter">
                 <span className="faceletter">{r}</span>
-                <img src={suit.img} alt="" className="facesuit" />
+                <svg viewBox="0 0 100 100" className="facesuit"><path d={SUIT_PATH[s as string]} fill={suit.color} /></svg>
               </div>
             )}
           </div>

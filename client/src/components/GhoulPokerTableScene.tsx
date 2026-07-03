@@ -28,7 +28,7 @@ interface Props {
 
 export default function GhoulPokerTableScene({ state, winners, winningCards, bubble, chipFlights, potPulse, winBurst, allInCinematic, onCardFlip }: Props) {
   const sceneRef = useRef<HTMLDivElement>(null);
-  const stageScale = useStageScale(sceneRef, STAGE_W, STAGE_H);
+  const stageScale = useStageScale(sceneRef, STAGE_W, STAGE_H, 1.45);
   const maxStack = Math.max(...state.players.map((p) => p.stack), 1);
   // real money on the table: show the denomination chips the pot contains
   const DENOMS: [number, string][] = [[1000, 'chip-1k'], [500, 'chip-500'], [100, 'chip-100'], [25, 'chip-25'], [5, 'chip-5']];

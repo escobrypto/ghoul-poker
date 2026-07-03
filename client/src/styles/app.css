@@ -89,6 +89,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .center{display:flex;flex-direction:column;gap:12px}
 .table-area{position:relative;border:2px solid var(--panel-edge);border-radius:16px;overflow:hidden;flex:1;min-height:clamp(430px,78vh,760px);background:#070310}
 .scene{position:absolute;inset:0;perspective:900px}
+.scene::before{content:"";position:absolute;inset:-24px;background:url('/assets/tables/midnight-room.jpg') center/cover no-repeat;filter:blur(16px) brightness(.45) saturate(1.15);z-index:0}
 /* The play stage: authored at a fixed design size (1200x720) and scaled as a
    single unit by useStageScale. Seats/felt/board/pot/deck/effects all share
    this ONE coordinate space, so they can never drift apart per-resolution. */
@@ -150,21 +151,21 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .felt-inner-glow{position:absolute;inset:0;border-radius:50%/46%;pointer-events:none;box-shadow:inset 0 0 80px rgba(57,255,139,.06),inset 0 0 40px rgba(157,78,221,.18)}
 .fx-lightning{position:absolute;inset:0;border-radius:50%/46%;pointer-events:none;z-index:2}
 
-.pot{position:absolute;left:50%;top:9%;transform:translateX(-50%);text-align:center;white-space:nowrap;z-index:4;
+.pot{position:absolute;left:50%;top:2%;transform:translateX(-50%);text-align:center;white-space:nowrap;z-index:4;
   background:linear-gradient(180deg,rgba(26,10,44,.95),rgba(10,5,20,.95));
   border:2px solid var(--violet);border-radius:26px;padding:8px 30px 10px;
   box-shadow:0 0 24px rgba(157,78,221,.45),inset 0 0 18px rgba(157,78,221,.12)}
 .pot-lbl{font-family:'Press Start 2P';font-size:11px;color:var(--violet-b);letter-spacing:1px;text-shadow:0 0 6px var(--violet)}
 .pot-amt{font-family:'Press Start 2P';font-size:26px;color:var(--gold);text-shadow:0 0 16px rgba(255,206,74,.8),0 2px 0 #000;margin-top:5px;animation:potpulse 2s infinite}
 @keyframes potpulse{0%,100%{text-shadow:0 0 12px rgba(255,206,74,.6),0 2px 0 #000}50%{text-shadow:0 0 26px rgba(255,206,74,1),0 2px 0 #000}}
-.community{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);display:flex;gap:13px;z-index:20;perspective:900px}
+.community{position:absolute;left:50%;top:53.5%;transform:translate(-50%,-50%);display:flex;gap:13px;z-index:20;perspective:900px}
 .community::before{content:"";position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:112%;height:130%;background:radial-gradient(50% 42% at 50% 60%,rgba(0,0,0,.55),transparent 70%);z-index:-1;filter:blur(6px)}
 .community .cardwrap{transform:rotateX(7deg)}
 .community .cardwrap .cardface{box-shadow:0 14px 14px -8px rgba(0,0,0,.65),0 0 12px var(--suitglow,rgba(0,0,0,.4)),inset 0 0 0 1px rgba(255,255,255,.05)}
 
 /* glowing chip stacks in the pot */
-.potchips{position:absolute;left:50%;top:20%;transform:translateX(-50%);display:flex;gap:7px;z-index:3;align-items:center}
-.potchips .denom{width:42px;height:42px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
+.potchips{position:absolute;left:50%;top:17.5%;transform:translateX(-50%);display:flex;gap:6px;z-index:3;align-items:center}
+.potchips .denom{width:37px;height:37px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
 .chip{width:18px;height:9px;border-radius:3px;display:block;position:relative;box-shadow:0 2px 4px rgba(0,0,0,.6);animation:chipdrop .35s backwards;animation-delay:calc(var(--n,0)*0.03s)}
 .chip::before{content:"";position:absolute;inset:0;border-radius:3px;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 2px rgba(0,0,0,.4)}
 .chip-0{background:linear-gradient(180deg,var(--violet-b),var(--violet));box-shadow:0 0 8px var(--violet),0 2px 4px rgba(0,0,0,.6)}

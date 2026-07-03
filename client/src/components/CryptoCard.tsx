@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { CRYPTO, Suit } from '../engine/poker';
+import { Suit } from '../engine/poker';
 
 interface Props {
   card?: string;
@@ -11,24 +11,47 @@ interface Props {
   onFlip?: () => void;   // fired exactly when the card flips to reveal
 }
 
-// A flip card: back face + front face on a 3D-rotated inner element.
-// Lifecycle: slide in from deck (back showing) → bounce → flip to front → glow if win.
+// ---------------------------------------------------------------------------
+// CARD v2 — neon traditional suits (Card Designs sheet). Cards are built in
+// layers: programmatic frame/indices/pips (crisp at any stage scale) + cropped
+// sheet art for suit glyphs and the skull card back. Face art (A/K/Q/J
+// renders) drops in later without touching this component's logic.
+// ---------------------------------------------------------------------------
+const SUITS: Record<string, { img: string; color: string; glow: string }> = {
+  s: { img: '/assets/cards/suit-spade.png',   color: '#b06dff', glow: 'rgba(157,78,221,.55)' },
+  h: { img: '/assets/cards/suit-heart.png',   color: '#ff4d6d', glow: 'rgba(255,77,109,.5)' },
+  c: { img: '/assets/cards/suit-club.png',    color: '#2ee6a8', glow: 'rgba(46,230,168,.5)' },
+  d: { img: '/assets/cards/suit-diamond.png', color: '#ff5bd1', glow: 'rgba(255,91,209,.5)' },
+};
+
+// classic pip coordinates (percent of pip field; true = rendered upside-down)
+type Pip = [number, number, boolean?];
+const PIPS: Record<string, Pip[]> = {
+  '2': [[50, 22], [50, 78, true]],
+  '3': [[50, 20], [50, 50], [50, 80, true]],
+  '4': [[31, 22], [69, 22], [31, 78, true], [69, 78, true]],
+  '5': [[31, 22], [69, 22], [50, 50], [31, 78, true], [69, 78, true]],
+  '6': [[31, 22], [69, 22], [31, 50], [69, 50], [31, 78, true], [69, 78, true]],
+  '7': [[31, 22], [69, 22], [50, 36], [31, 50], [69, 50], [31, 78, true], [69, 78, true]],
+  '8': [[31, 22], [69, 22], [50, 36], [31, 50], [69, 50], [50, 64, true], [31, 78, true], [69, 78, true]],
+  '9': [[31, 20], [69, 20], [31, 41], [69, 41], [50, 50], [31, 59, true], [69, 59, true], [31, 80, true], [69, 80, true]],
+  'T': [[31, 20], [69, 20], [50, 30], [31, 41], [69, 41], [31, 59, true], [69, 59, true], [50, 70, true], [31, 80, true], [69, 80, true]],
+};
+
 export default function CryptoCard({
   card, big, faceUp = true, win, dimmed, dealIndex = 0, onFlip,
 }: Props) {
   const [flipped, setFlipped] = useState(false);
   const flipFired = useRef(false);
 
-  // Time the flip after the slide+bounce lands. Fast + snappy.
-  // dealIndex < 0 means "already on the board" — show face immediately, no re-deal/sound.
   useEffect(() => {
     if (!card || !faceUp) { setFlipped(false); flipFired.current = false; return; }
     if (dealIndex < 0) { setFlipped(true); flipFired.current = true; return; }
-    const slide = 90 * dealIndex; // stagger
+    const slide = 90 * dealIndex;
     const t = setTimeout(() => {
       setFlipped(true);
       if (!flipFired.current) { flipFired.current = true; onFlip?.(); }
-    }, slide + 240); // slide ~240ms then flip
+    }, slide + 240);
     return () => clearTimeout(t);
   }, [card, faceUp, dealIndex, onFlip]);
 
@@ -37,12 +60,11 @@ export default function CryptoCard({
   const r = card[0];
   const s = card[1] as Suit;
   const rank = r === 'T' ? '10' : r;
-  // A card is only "known" if it's a valid 2-char code with a real suit. Hidden
-  // opponent cards (server sends null -> adapter passes a placeholder) have no
-  // valid suit, so they always render as a back — never crash on CRYPTO[s].
-  const suitInfo = CRYPTO[s];
-  const known = !!suitInfo && card.length >= 2;
+  const suit = SUITS[s as string];
+  const known = !!suit && card.length >= 2;
   const showFront = faceUp && flipped && known;
+  const pips = PIPS[r];
+  const isFace = r === 'J' || r === 'Q' || r === 'K';
 
   return (
     <div
@@ -50,14 +72,31 @@ export default function CryptoCard({
       style={{ ['--di' as string]: dealIndex }}
     >
       <div className={`card3d${showFront ? ' flipped' : ''}`}>
-        {/* back face */}
+        {/* back face — skull art from the card sheet */}
         <div className="cardface back" />
-        {/* front face — only rendered for known cards (hidden cards stay backs) */}
         {known && (
-          <div className={`cardface front s-${s}${win ? ' win' : ''}`}>
-            <span className="rank">{rank}</span>
-            <span className="sym">{suitInfo.sym}</span>
-            <span className="rank br">{rank}</span>
+          <div
+            className={`cardface front${win ? ' win' : ''}`}
+            style={{ ['--suit' as string]: suit.color, ['--suitglow' as string]: suit.glow }}
+          >
+            <span className="idx"><b>{rank}</b><img src={suit.img} alt="" /></span>
+            <span className="idx br"><b>{rank}</b><img src={suit.img} alt="" /></span>
+
+            {pips && (
+              <div className="pipfield">
+                {pips.map(([x, y, rot], i) => (
+                  <img key={i} src={suit.img} alt="" className={`pip${rot ? ' rot' : ''}`}
+                    style={{ left: `${x}%`, top: `${y}%` }} />
+                ))}
+              </div>
+            )}
+            {r === 'A' && <img src={suit.img} alt="" className="acepip" />}
+            {isFace && (
+              <div className="facecenter">
+                <span className="faceletter">{r}</span>
+                <img src={suit.img} alt="" className="facesuit" />
+              </div>
+            )}
           </div>
         )}
       </div>

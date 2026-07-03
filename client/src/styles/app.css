@@ -12,7 +12,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .fx-confetti{position:fixed;inset:0;z-index:8500;pointer-events:none}
 
 .app{position:relative;z-index:2;display:grid;gap:12px;padding:12px;grid-template-columns:1fr;max-width:1820px;margin:0 auto}
-@media(min-width:1180px){.app{grid-template-columns:300px 1fr 320px;grid-template-rows:auto 1fr;grid-template-areas:"top top top" "left center right";min-height:100vh}}
+@media(min-width:1180px){.app{grid-template-columns:266px 1fr 286px;grid-template-rows:auto 1fr;grid-template-areas:"top top top" "left center right";min-height:100vh}}
 .topbar{grid-area:top}.left{grid-area:left}.center{grid-area:center}.right{grid-area:right}
 
 /* top bar */
@@ -50,18 +50,18 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .left,.right{display:flex;flex-direction:column;gap:12px}
 .chat-panel{flex:1;display:flex;flex-direction:column}
 .chat-body{flex:1;display:flex;flex-direction:column}
-.chatlog{height:300px;overflow-y:auto;font-size:17px;line-height:1.5}
+.chatlog{height:300px;overflow-y:auto;font-size:14px;line-height:1.45;letter-spacing:.2px}
 .chatlog .nm{font-weight:bold}
 .chatlog .ghoulking{color:var(--gold)}.chatlog .nightstalker{color:var(--magenta)}
 .chatlog .riverrat{color:var(--orange)}.chatlog .liquidityhunter{color:var(--cyan)}
 .chatlog .degenoracle{color:var(--violet-b)}.chatlog .cryptobanshee{color:var(--neon)}
 .chatlog .you{color:#fff}.chatlog .sys{color:var(--ink-dim);font-style:italic}
 .chatinput{display:flex;gap:7px;margin-top:9px}
-.chatinput input{flex:1;background:#0a0716;border:2px solid var(--panel-edge);border-radius:8px;color:var(--ink);font-family:'VT323';font-size:17px;padding:7px 9px;outline:none}
+.chatinput input{flex:1;background:#0a0716;border:1.5px solid var(--panel-edge);border-radius:8px;color:var(--ink);font-family:'VT323';font-size:15px;padding:6px 9px;outline:none}
 .chatinput input:focus{border-color:var(--violet)}
-.chatinput button{background:#2a1147;border:2px solid var(--violet);border-radius:8px;color:var(--violet-b);cursor:pointer;padding:0 14px;font-size:19px}
+.chatinput button{background:#2a1147;border:1.5px solid var(--violet);border-radius:8px;color:var(--violet-b);cursor:pointer;padding:0 12px;font-size:16px}
 .emotes{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
-.emotes button{background:rgba(11,7,24,.7);border:1.5px solid var(--panel-edge);border-radius:7px;cursor:pointer;font-size:16px;padding:3px 7px;transition:.15s}
+.emotes button{background:rgba(11,7,24,.7);border:1.5px solid var(--panel-edge);border-radius:7px;cursor:pointer;font-size:14px;padding:2px 6px;transition:.15s}
 .emotes button:hover{border-color:var(--violet);transform:translateY(-2px)}
 .missions li{list-style:none;font-size:16px;padding:6px 0;border-bottom:1px dotted #221538;display:flex;justify-content:space-between;gap:8px}
 .missions .done{color:var(--neon);text-decoration:line-through;opacity:.7}
@@ -145,14 +145,18 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .felt-inner-glow{position:absolute;inset:0;border-radius:50%/46%;pointer-events:none;box-shadow:inset 0 0 80px rgba(57,255,139,.06),inset 0 0 40px rgba(157,78,221,.18)}
 .fx-lightning{position:absolute;inset:0;border-radius:50%/46%;pointer-events:none;z-index:2}
 
-.pot{position:absolute;left:50%;top:24%;transform:translateX(-50%);text-align:center;white-space:nowrap;z-index:3}
-.pot-lbl{font-family:'Press Start 2P';font-size:12px;color:var(--violet-b);letter-spacing:1px;text-shadow:0 0 6px var(--violet)}
-.pot-amt{font-family:'Press Start 2P';font-size:23px;color:var(--gold);text-shadow:0 0 16px rgba(255,206,74,.8),0 2px 0 #000;margin-top:5px;animation:potpulse 2s infinite}
+.pot{position:absolute;left:50%;top:9%;transform:translateX(-50%);text-align:center;white-space:nowrap;z-index:4;
+  background:linear-gradient(180deg,rgba(26,10,44,.95),rgba(10,5,20,.95));
+  border:2px solid var(--violet);border-radius:26px;padding:8px 30px 10px;
+  box-shadow:0 0 24px rgba(157,78,221,.45),inset 0 0 18px rgba(157,78,221,.12)}
+.pot-lbl{font-family:'Press Start 2P';font-size:11px;color:var(--violet-b);letter-spacing:1px;text-shadow:0 0 6px var(--violet)}
+.pot-amt{font-family:'Press Start 2P';font-size:26px;color:var(--gold);text-shadow:0 0 16px rgba(255,206,74,.8),0 2px 0 #000;margin-top:5px;animation:potpulse 2s infinite}
 @keyframes potpulse{0%,100%{text-shadow:0 0 12px rgba(255,206,74,.6),0 2px 0 #000}50%{text-shadow:0 0 26px rgba(255,206,74,1),0 2px 0 #000}}
-.community{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);display:flex;gap:11px;z-index:3}
+.community{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);display:flex;gap:13px;z-index:3}
 
 /* glowing chip stacks in the pot */
-.potchips{position:absolute;left:50%;top:64%;transform:translateX(-50%);display:flex;gap:4px;z-index:3;align-items:flex-end}
+.potchips{position:absolute;left:50%;top:26%;transform:translateX(-50%);display:flex;gap:7px;z-index:3;align-items:center}
+.potchips .denom{width:42px;height:42px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
 .chip{width:18px;height:9px;border-radius:3px;display:block;position:relative;box-shadow:0 2px 4px rgba(0,0,0,.6);animation:chipdrop .35s backwards;animation-delay:calc(var(--n,0)*0.03s)}
 .chip::before{content:"";position:absolute;inset:0;border-radius:3px;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -2px 2px rgba(0,0,0,.4)}
 .chip-0{background:linear-gradient(180deg,var(--violet-b),var(--violet));box-shadow:0 0 8px var(--violet),0 2px 4px rgba(0,0,0,.6)}
@@ -169,7 +173,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .scene-vignette{position:absolute;inset:0;z-index:20;pointer-events:none;background:radial-gradient(120% 100% at 50% 45%,transparent 50%,rgba(5,2,12,.55) 88%,rgba(3,1,8,.85) 100%)}
 
 /* seats sit above scene */
-.seat{position:absolute;width:176px;transform:translate(-50%,-50%);text-align:center;z-index:15}
+.seat{/* widened for Card v2 */position:absolute;width:198px;transform:translate(-50%,-50%);text-align:center;z-index:15}
 .seat .pod{border:2px solid var(--panel-edge);border-radius:12px;padding:0 8px 9px;position:relative;background:linear-gradient(180deg,rgba(16,10,30,.9),rgba(6,4,14,.95));transition:.25s;box-shadow:0 8px 18px rgba(0,0,0,.6)}
 .seat.active .pod{border-color:var(--neon);box-shadow:0 0 24px rgba(57,255,139,.6),0 8px 18px rgba(0,0,0,.6)}
 .seat.winner .pod{border-color:var(--gold);box-shadow:0 0 26px rgba(255,206,74,.7),0 8px 18px rgba(0,0,0,.6)}
@@ -192,13 +196,13 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 @keyframes bubblein{from{opacity:0;transform:translateX(-50%) translateY(4px)}to{opacity:1;transform:translateX(-50%)}}
 .dealerbtn{position:absolute;bottom:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#fff,#cbb6ff);color:#1a0d33;font-family:'Press Start 2P';font-size:10px;display:none;place-items:center;border:2px solid var(--violet);box-shadow:0 0 8px var(--violet)}
 .seat.has-button .dealerbtn{display:grid}
-.holecards{display:flex;gap:5px;justify-content:center;margin-top:5px;min-height:64px}
+.holecards{display:flex;gap:6px;justify-content:center;margin-top:5px;min-height:84px}
 
 /* cards — 3D flip: slide from deck, bounce, flip, glow */
-.cardwrap{width:44px;height:62px;position:relative;perspective:600px;
+.cardwrap{width:58px;height:82px;position:relative;perspective:600px;
   animation:cardSlide .26s cubic-bezier(.2,1.3,.5,1) backwards;
   animation-delay:calc(var(--di,0)*90ms)}
-.cardwrap.big{width:84px;height:118px}
+.cardwrap.big{width:100px;height:144px}
 .holecards .cardwrap{display:inline-block}
 @keyframes cardSlide{
   0%{transform:translate(var(--deckdx,0px),var(--deckdy,-120px)) rotate(-12deg) scale(.7);opacity:0}
@@ -210,23 +214,33 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .card3d.flipped{transform:rotateY(180deg)}
 .cardface{position:absolute;inset:0;border-radius:5px;backface-visibility:hidden;display:grid;place-items:center;box-shadow:0 3px 6px rgba(0,0,0,.5)}
 /* back shows first (front is pre-rotated 180 so it's hidden until flip) */
-.cardface.back{background:repeating-linear-gradient(45deg,#2a1147 0 4px,#1a0a33 4px 8px);border:1.5px solid var(--violet)}
-.cardface.back::after{content:"GG";position:absolute;inset:0;display:grid;place-items:center;font-family:'Press Start 2P';font-size:14px;color:var(--violet-b);text-shadow:0 0 6px var(--violet)}
-.cardwrap.big .cardface.back::after{font-size:20px}
-.cardface.front{transform:rotateY(180deg);background:#0d0a1a;border:1.5px solid #2a1a47}
-.cardface.front .rank{position:absolute;top:3px;left:5px;font-family:'VT323';font-size:18px;font-weight:bold;line-height:1}
-.cardwrap.big .cardface.front .rank{font-size:26px;top:6px;left:8px}
-.cardface.front .rank.br{top:auto;bottom:2px;left:auto;right:4px;transform:rotate(180deg)}
-.cardface.front .sym{font-family:'Press Start 2P';font-size:20px;font-weight:bold}
-.cardwrap.big .cardface.front .sym{font-size:34px}
-.cardface.front.s-s{border-color:var(--sol)}.front.s-s .rank,.front.s-s .sym{color:var(--sol)}
-.cardface.front.s-h{border-color:var(--btc)}.front.s-h .rank,.front.s-h .sym{color:var(--btc)}
-.cardface.front.s-d{border-color:var(--eth)}.front.s-d .rank,.front.s-d .sym{color:#aab2d8}
-.cardface.front.s-c{border-color:var(--doge)}.front.s-c .rank,.front.s-c .sym{color:var(--doge)}
-.cardface.front.s-s{box-shadow:0 0 12px rgba(20,241,149,.5),0 3px 6px rgba(0,0,0,.5)}
-.cardface.front.s-h{box-shadow:0 0 12px rgba(247,147,26,.5),0 3px 6px rgba(0,0,0,.5)}
-.cardface.front.s-d{box-shadow:0 0 12px rgba(138,146,178,.5),0 3px 6px rgba(0,0,0,.5)}
-.cardface.front.s-c{box-shadow:0 0 12px rgba(194,166,51,.5),0 3px 6px rgba(0,0,0,.5)}
+.cardface.back{background:#120a22 url('/assets/cards/back-default.png') center/cover no-repeat;border:1.5px solid var(--violet)}
+.cardface.front{transform:rotateY(180deg);background:
+  radial-gradient(120% 120% at 50% 0%,rgba(255,255,255,.05),transparent 55%),
+  linear-gradient(160deg,#141024,#0b0716 60%,#0d0a1a);
+  border:1.5px solid var(--suit,#2a1a47);
+  box-shadow:0 0 12px var(--suitglow,rgba(0,0,0,.4)),inset 0 0 0 1px rgba(255,255,255,.05),0 3px 6px rgba(0,0,0,.5)}
+/* corner indices: rank over a mini suit glyph */
+.cardface.front .idx{position:absolute;top:3px;left:4px;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1}
+.cardface.front .idx b{font-family:'VT323';font-weight:bold;font-size:20px;color:var(--suit);text-shadow:0 0 6px var(--suitglow)}
+.cardface.front .idx img{width:10px}
+.cardwrap.big .cardface.front .idx b{font-size:28px}
+.cardwrap.big .cardface.front .idx img{width:15px}
+.cardface.front .idx.br{top:auto;bottom:3px;left:auto;right:4px;transform:rotate(180deg)}
+/* pip field (2-10) */
+.pipfield{position:absolute;inset:12% 18%;pointer-events:none}
+.pip{position:absolute;width:15px;transform:translate(-50%,-50%);filter:drop-shadow(0 0 3px var(--suitglow))}
+.pip.rot{transform:translate(-50%,-50%) rotate(180deg)}
+.cardwrap.big .pip{width:24px}
+/* ace: one big glyph */
+.acepip{width:34px;filter:drop-shadow(0 0 8px var(--suitglow))}
+.cardwrap.big .acepip{width:56px}
+/* face cards (interim until A/K/Q/J art renders land) */
+.facecenter{display:flex;flex-direction:column;align-items:center;gap:2px}
+.faceletter{font-family:'Press Start 2P';font-size:24px;color:var(--suit);text-shadow:0 0 10px var(--suitglow),0 0 22px var(--suitglow)}
+.cardwrap.big .faceletter{font-size:40px}
+.facesuit{width:20px;filter:drop-shadow(0 0 5px var(--suitglow))}
+.cardwrap.big .facesuit{width:32px}
 /* winning cards glow gold at showdown */
 .cardface.front.win{outline:2px solid var(--gold);box-shadow:0 0 20px var(--gold),0 0 40px rgba(255,206,74,.5)!important;animation:winp .9s infinite}
 @keyframes winp{0%,100%{box-shadow:0 0 14px var(--gold),0 0 28px rgba(255,206,74,.4)}50%{box-shadow:0 0 28px var(--gold),0 0 52px rgba(255,206,74,.7)}}

@@ -30,7 +30,9 @@ export default function GhoulPokerTableScene({ state, winners, winningCards, bub
   const sceneRef = useRef<HTMLDivElement>(null);
   const stageScale = useStageScale(sceneRef, STAGE_W, STAGE_H);
   const maxStack = Math.max(...state.players.map((p) => p.stack), 1);
-  const potChips = Math.min(16, Math.floor(state.pot / 350) + (state.pot > 0 ? 1 : 0));
+  // real money on the table: show the denomination chips the pot contains
+  const DENOMS: [number, string][] = [[1000, 'chip-1k'], [500, 'chip-500'], [100, 'chip-100'], [25, 'chip-25'], [5, 'chip-5']];
+  const potDenoms = DENOMS.filter(([v]) => state.pot >= v).map(([, img]) => img);
 
   // Only the most recently dealt street should stagger-animate. flop=3 cards (idx0-2),
   // turn=4th, river=5th. Cards already on the board before this street don't re-deal.
@@ -98,7 +100,7 @@ export default function GhoulPokerTableScene({ state, winners, winningCards, bub
         <TableLightning />
 
         <div className="pot">
-          <div className="pot-lbl">💀 POT</div>
+          <div className="pot-lbl">💀 POT 💀</div>
           <div className={`pot-amt${allInCinematic ? ' allin-pulse' : ''}`} key={potPulse} data-pulse={potPulse > 0}>{state.pot.toLocaleString()}</div>
         </div>
         <div className="community">
@@ -115,8 +117,8 @@ export default function GhoulPokerTableScene({ state, winners, winningCards, bub
           ))}
         </div>
         <div className="potchips">
-          {Array.from({ length: potChips }, (_, i) => (
-            <i key={i} className={`chip chip-${i % 3}`} style={{ ['--n' as string]: i }} />
+          {potDenoms.map((img) => (
+            <img key={img} src={`/assets/chips/${img}.png`} alt="" className="denom" />
           ))}
         </div>
       </div>

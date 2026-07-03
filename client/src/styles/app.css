@@ -233,13 +233,11 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .cardwrap.big .cardface.front .idx img{width:15px}
 .cardface.front .idx.br{top:auto;bottom:3px;left:auto;right:4px;transform:rotate(180deg)}
 /* pip field (2-10) */
-.pipfield{position:absolute;inset:12% 18%;pointer-events:none}
-.pip{position:absolute;width:15px;transform:translate(-50%,-50%);filter:drop-shadow(0 0 3px var(--suitglow))}
+.pipfield{position:absolute;inset:13% 15%;pointer-events:none}
+.pip{position:absolute;width:19%;height:15%;object-fit:contain;transform:translate(-50%,-50%);filter:drop-shadow(0 0 2px var(--suitglow))}
 .pip.rot{transform:translate(-50%,-50%) rotate(180deg)}
-.cardwrap.big .pip{width:24px}
 /* ace: one big glyph */
-.acepip{width:34px;filter:drop-shadow(0 0 8px var(--suitglow))}
-.cardwrap.big .acepip{width:56px}
+.acepip{width:46%;height:38%;object-fit:contain;filter:drop-shadow(0 0 6px var(--suitglow))}
 /* face cards (interim until A/K/Q/J art renders land) */
 .facecenter{display:flex;flex-direction:column;align-items:center;gap:2px}
 .faceletter{font-family:'Press Start 2P';font-size:24px;color:var(--suit);text-shadow:0 0 10px var(--suitglow),0 0 22px var(--suitglow)}
@@ -589,8 +587,6 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 .cardwrap.mine .cardface.front{box-shadow:0 0 16px var(--suitglow),0 0 34px var(--suitglow),inset 0 0 0 1px rgba(255,255,255,.09),0 8px 16px rgba(0,0,0,.6)}
 .cardwrap.mine .cardface.front .idx b{font-size:23px}
 .cardwrap.mine .cardface.front .idx img{width:12px}
-.cardwrap.mine .pip{width:18px}
-.cardwrap.mine .acepip{width:42px}
 .cardwrap.mine .faceletter{font-size:29px}
 .cardwrap.mine .facesuit{width:23px}
 /* your seat: one unified panel — name / stack / bar / cards, avatar above (mock) */

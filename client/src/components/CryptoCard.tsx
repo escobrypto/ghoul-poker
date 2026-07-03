@@ -84,14 +84,23 @@ export default function CryptoCard({
             <span className="idx br"><b>{rank}</b><img src={suit.img} alt="" /></span>
 
             {pips && (
-              <div className="pipfield">
-                {pips.map(([x, y, rot], i) => (
-                  <img key={i} src={suit.img} alt="" className={`pip${rot ? ' rot' : ''}`}
-                    style={{ left: `${x}%`, top: `${y}%` }} />
-                ))}
-              </div>
+              <svg className="pipsvg" viewBox="0 0 100 140" preserveAspectRatio="none">
+                {pips.map(([x, y, rot], i) => {
+                  const cx = 15 + 70 * (x / 100);
+                  const cy = 18 + 104 * (y / 100);
+                  return (
+                    <image key={i} href={suit.img} x={cx - 9.5} y={cy - 10.5} width="19" height="21"
+                      preserveAspectRatio="xMidYMid meet"
+                      transform={rot ? `rotate(180 ${cx} ${cy})` : undefined} />
+                  );
+                })}
+              </svg>
             )}
-            {r === 'A' && <img src={suit.img} alt="" className="acepip" />}
+            {r === 'A' && (
+              <svg className="pipsvg" viewBox="0 0 100 140" preserveAspectRatio="none">
+                <image href={suit.img} x="27" y="43" width="46" height="54" preserveAspectRatio="xMidYMid meet" />
+              </svg>
+            )}
             {isFace && (
               <div className="facecenter">
                 <span className="faceletter">{r}</span>

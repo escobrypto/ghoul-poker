@@ -157,7 +157,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .pot-lbl{font-family:'Press Start 2P';font-size:11px;color:var(--violet-b);letter-spacing:1px;text-shadow:0 0 6px var(--violet)}
 .pot-amt{font-family:'Press Start 2P';font-size:26px;color:var(--gold);text-shadow:0 0 16px rgba(255,206,74,.8),0 2px 0 #000;margin-top:5px;animation:potpulse 2s infinite}
 @keyframes potpulse{0%,100%{text-shadow:0 0 12px rgba(255,206,74,.6),0 2px 0 #000}50%{text-shadow:0 0 26px rgba(255,206,74,1),0 2px 0 #000}}
-.community{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);display:flex;gap:13px;z-index:3}
+.community{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);display:flex;gap:13px;z-index:3}
 
 /* glowing chip stacks in the pot */
 .potchips{position:absolute;left:50%;top:26%;transform:translateX(-50%);display:flex;gap:7px;z-index:3;align-items:center}
@@ -233,11 +233,8 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 .cardwrap.big .cardface.front .idx img{width:15px}
 .cardface.front .idx.br{top:auto;bottom:3px;left:auto;right:4px;transform:rotate(180deg)}
 /* pip field (2-10) */
-.pipfield{position:absolute;inset:13% 15%;pointer-events:none}
-.pip{position:absolute;width:19%;height:15%;object-fit:contain;transform:translate(-50%,-50%);filter:drop-shadow(0 0 2px var(--suitglow))}
-.pip.rot{transform:translate(-50%,-50%) rotate(180deg)}
+.pipsvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;filter:drop-shadow(0 0 2px var(--suitglow))}
 /* ace: one big glyph */
-.acepip{width:46%;height:38%;object-fit:contain;filter:drop-shadow(0 0 6px var(--suitglow))}
 /* face cards (interim until A/K/Q/J art renders land) */
 .facecenter{display:flex;flex-direction:column;align-items:center;gap:2px}
 .faceletter{font-family:'Press Start 2P';font-size:24px;color:var(--suit);text-shadow:0 0 10px var(--suitglow),0 0 22px var(--suitglow)}
@@ -590,9 +587,10 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 .cardwrap.mine .faceletter{font-size:29px}
 .cardwrap.mine .facesuit{width:23px}
 /* your seat: one unified panel — name / stack / bar / cards, avatar above (mock) */
-.seat.you{width:236px;transform:translate(-50%,-54%)}
+.seat.you{width:236px;transform:translate(-50%,-50%)}
 .seat.you .pod{border-width:1.5px;border-radius:14px;padding:0 10px 12px}
-.seat.you .spritebox{margin-top:-72px}
+.seat.you .spritebox{height:78px;margin-top:-40px}
+.seat.you .spritebox .ghoul-img{width:92px;max-height:100px}
 .seat.you .pbar{margin:6px 10px 0}
 .seat.you .holecards{margin-top:10px;gap:9px;min-height:100px}
 .seat.you.active .pod{border-color:var(--neon);box-shadow:0 0 22px rgba(57,255,139,.5)}

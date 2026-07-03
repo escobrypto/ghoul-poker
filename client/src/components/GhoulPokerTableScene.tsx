@@ -11,7 +11,7 @@ import { useStageScale } from '../hooks/useStageScale';
 
 // The play stage is authored at this fixed size and scaled as ONE unit to fit
 // any viewport (see useStageScale). Room dressing stays full-bleed behind it.
-const STAGE_W = 1200;
+const STAGE_W = 1280;
 const STAGE_H = 720;
 
 interface Props {
@@ -50,38 +50,7 @@ export default function GhoulPokerTableScene({ state, winners, winningCards, bub
 
   return (
     <div className="scene" ref={sceneRef}>
-      {/* ===== ROOM (back to front) ===== */}
-      <div className="wall-brick" />
-      <div className="wall-shade" />
-
-      {/* moonlit window cut into the wall */}
-      <div className="window">
-        <div className="window-sky" />
-        <div className="window-moon" />
-        <div className="window-skyline" />
-        <div className="window-bars" />
-        <div className="window-glow" />
-      </div>
-
-      {/* neon signage */}
-      <div className="neon-gg">GHOUL<br />GANG</div>
-      <div className="neon-skull" />
-
-      {/* hanging chains + wall candles with cast light */}
-      <div className="chain chain-l" />
-      <div className="chain chain-r" />
-      {[[4, 50], [11, 30], [89, 30], [96, 50]].map(([x, y], i) => (
-        <div key={`wc${i}`} className="wall-candle" style={{ left: `${x}%`, top: `${y}%` }}>
-          <div className="wc-glow" />
-          <div className="wc-stick" />
-          <div className="wc-flame" />
-        </div>
-      ))}
-
-      {/* wooden floor in perspective */}
-      <div className="floor-wood" />
-      <div className="floor-shade" />
-
+      {/* ===== ROOM + TABLE: one painted perspective render (theme asset) ===== */}
       {/* drifting smoke */}
       <SmokeLayer />
 
@@ -90,13 +59,8 @@ export default function GhoulPokerTableScene({ state, winners, winningCards, bub
         className="stage"
         style={{ width: STAGE_W, height: STAGE_H, transform: `translate(-50%,-50%) scale(${stageScale})` }}
       >
-      <div className="table-shadow" />
+      {/* invisible anchor matched to the PAINTED felt ellipse — children position on the art */}
       <div className="felt">
-        <div className="felt-surface" />
-        <div className="felt-rim" />
-        <div className="felt-rail" />
-        <div className="felt-cracks" />
-        <div className="felt-inner-glow" />
         <TableLightning />
 
         <div className="pot">
@@ -125,14 +89,6 @@ export default function GhoulPokerTableScene({ state, winners, winningCards, bub
           ))}
         </div>
 
-      {/* tabletop candles */}
-      {[[26, 70], [74, 70]].map(([x, y], i) => (
-        <div key={`tc${i}`} className="table-candle" style={{ left: `${x}%`, top: `${y}%` }}>
-          <div className="tc-glow" />
-          <div className="tc-stick" />
-          <div className="tc-flame" />
-        </div>
-      ))}
 
       {/* deck stack near the dealer button */}
       {state.stage !== 'idle' && (

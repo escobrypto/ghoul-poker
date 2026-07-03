@@ -57,7 +57,7 @@ export default function AppNet() {
               <div><h1>GHOUL <b>POKER</b></h1><small>ROOM {g.room?.code}</small></div>
             </div>
             <div className="tablemeta">
-              NL HOLD'EM ◆ <b>10 / 20</b> ◆ HAND #{g.state.stage !== 'idle' ? '•' : '—'}
+              NL HOLD'EM ◆ <b>10 / 20</b> ◆ HAND #{g.state.handNo || '—'}
             </div>
             <button className="gbtn fold leave-btn" onClick={() => g.leaveRoom()}>LEAVE TABLE</button>
           </header>

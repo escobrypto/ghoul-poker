@@ -54,6 +54,7 @@ export function adaptTable(t: PublicTable): AdaptedView {
     players,
     deck: [],                 // client never has the deck — authoritative on server
     board: t.board.slice(),
+    handNo: t.handNo,
     pot: t.pot,
     toCall: t.toCall,
     minRaise: t.minRaise,

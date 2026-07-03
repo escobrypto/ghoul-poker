@@ -13,7 +13,11 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;b
 
 .app{position:relative;z-index:2;display:grid;gap:12px;padding:12px;grid-template-columns:1fr;max-width:1820px;margin:0 auto}
 @media(min-width:1180px){.app{grid-template-columns:266px 1fr 286px;grid-template-rows:auto 1fr;grid-template-areas:"top top top" "left center right";min-height:100vh}
-.app.app-immersive{grid-template-columns:1fr;grid-template-areas:"top" "center"}}
+.app.app-immersive{grid-template-columns:1fr;grid-template-areas:"top" "center";padding:0;gap:0}}
+.app-immersive .topbar{border-radius:0;border-left:0;border-right:0;border-top:0;margin:0}
+.app-immersive .center{gap:0}
+.app-immersive .table-area{border:0;border-radius:0;min-height:0}
+.app-immersive .actionbar{border-radius:0;border-left:0;border-right:0;border-bottom:0}
 .topbar{grid-area:top}.left{grid-area:left}.center{grid-area:center}.right{grid-area:right}
 
 /* top bar */
@@ -282,8 +286,8 @@ button.gbtn.deal{border-color:var(--neon);color:var(--neon)}
 .quickbets button{font-family:'VT323';font-size:15px;background:rgba(11,7,24,.7);border:1.5px solid var(--panel-edge);border-radius:7px;color:var(--ink-dim);cursor:pointer;padding:6px 9px;transition:.15s}
 .quickbets button:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
 .quickbets button:disabled{opacity:.3;cursor:not-allowed}
-.timer{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-family:'Press Start 2P';font-size:15px;color:#fff;background:conic-gradient(var(--neon) var(--p,100%),#1a0d33 0);position:relative}
-.timer::before{content:"";position:absolute;inset:4px;border-radius:50%;background:#0a0617}
+.timer{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;font-family:'Press Start 2P';font-size:18px;color:#fff;background:conic-gradient(var(--neon) var(--p,100%),#1a0d33 0);position:relative;box-shadow:0 0 16px rgba(57,255,139,.35)}
+.timer::before{content:"";position:absolute;inset:5px;border-radius:50%;background:#0a0617}
 .timer span{position:relative;z-index:1}
 .timer.warn{background:conic-gradient(var(--danger) var(--p,100%),#1a0d33 0)}
 .sliderwrap{display:flex;align-items:center;gap:12px;flex:1;min-width:220px}
@@ -580,18 +584,26 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 .overlay .panel{border:none;background:transparent;box-shadow:none;padding:0}
 
 /* ---- hero treatment: the local player's hand ---- */
-.cardwrap.mine{width:82px;height:116px}
+.cardwrap.mine{width:68px;height:96px}
 .cardwrap.mine .cardface{border-width:2px}
 .cardwrap.mine .cardface.front{box-shadow:0 0 16px var(--suitglow),0 0 34px var(--suitglow),inset 0 0 0 1px rgba(255,255,255,.09),0 8px 16px rgba(0,0,0,.6)}
-.cardwrap.mine .cardface.front .idx b{font-size:27px}
-.cardwrap.mine .cardface.front .idx img{width:14px}
-.cardwrap.mine .pip{width:21px}
-.cardwrap.mine .acepip{width:48px}
-.cardwrap.mine .faceletter{font-size:34px}
-.cardwrap.mine .facesuit{width:27px}
-/* your seat: compact plate, cards drop below it with room to breathe */
-.seat.you{width:262px;transform:translate(-50%,-60%)}
-.seat.you .pod{border-width:1.5px;padding-bottom:0;background:linear-gradient(180deg,rgba(16,10,30,.82),rgba(6,4,14,.6) 78%,transparent)}
+.cardwrap.mine .cardface.front .idx b{font-size:23px}
+.cardwrap.mine .cardface.front .idx img{width:12px}
+.cardwrap.mine .pip{width:18px}
+.cardwrap.mine .acepip{width:42px}
+.cardwrap.mine .faceletter{font-size:29px}
+.cardwrap.mine .facesuit{width:23px}
+/* your seat: one unified panel — name / stack / bar / cards, avatar above (mock) */
+.seat.you{width:236px;transform:translate(-50%,-54%)}
+.seat.you .pod{border-width:1.5px;border-radius:14px;padding:0 10px 12px}
 .seat.you .spritebox{margin-top:-72px}
-.seat.you .holecards{margin-top:14px;gap:10px;min-height:120px;transform:translateY(12px)}
-.seat.you.active .pod{border-color:var(--neon);box-shadow:0 0 20px rgba(57,255,139,.45)}
+.seat.you .pbar{margin:6px 10px 0}
+.seat.you .holecards{margin-top:10px;gap:9px;min-height:100px}
+.seat.you.active .pod{border-color:var(--neon);box-shadow:0 0 22px rgba(57,255,139,.5)}
+
+.timerwrap{display:flex;flex-direction:column;align-items:center;gap:4px;margin-left:auto}
+.tb-label{font-family:'Press Start 2P';font-size:8px;letter-spacing:1px;color:var(--ink-dim)}
+.timer.warn{box-shadow:0 0 16px rgba(255,64,96,.45)}
+.sliderwrap .step{width:34px;height:34px;border-radius:8px;background:rgba(11,7,24,.8);border:1.5px solid var(--panel-edge);color:var(--ink);font-size:18px;cursor:pointer;transition:.15s}
+.sliderwrap .step:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.sliderwrap .step:disabled{opacity:.3;cursor:not-allowed}

@@ -5,7 +5,7 @@ v1.0 = "a polished, addictive multiplayer poker game." Every screen
 intentional, every interaction polished, codebase modular. Quality over
 quantity. Ship the premium feel FIRST; systems plug in after.
 
-Last updated: IMMERSIVE PASS shipped — full-screen stage (chat/history are
+Last updated: IMMERSIVE PASS v2 (second mock) shipped — full-bleed room (no table box), unified you-panel with cards inside at mock proportions (68x96), action bar to mock spec: ring timer + TIME BANK, −/+ steppers, ALL IN amount, real hand number in the top bar. Previously: IMMERSIVE PASS shipped — full-screen stage (chat/history are
 popout overlays), hero treatment for the local player's hand (82x116 cards,
 brighter neon, compact plate, cards breathe below it). Visual hierarchy now:
 board > your hand > pot > opponents. Earlier: NATIVE AUTH + GENESIS GHOUL SHIPPED (auth 12/12, PG 20/20, full

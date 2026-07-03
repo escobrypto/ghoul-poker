@@ -83,22 +83,29 @@ export default function ActionBar({ isIdle, prompt, status, youStack, pot, onDea
         <button className="gbtn raise" disabled={!active || youStack <= need} onClick={() => onAct('raise', raise)}>
           RAISE TO <small>◈{raise.toLocaleString()}</small>
         </button>
-        <button className={`gbtn allin${allInActive ? ' danger' : ''}`} disabled={!active} onClick={() => onAct('raise', youStack + (need > 0 ? need : 0))}>ALL IN</button>
+        <button className={`gbtn allin${allInActive ? ' danger' : ''}`} disabled={!active} onClick={() => onAct('raise', youStack + (need > 0 ? need : 0))}>
+          ALL IN <small>◈{youStack.toLocaleString()}</small>
+        </button>
         <div className="quickbets">
           <button onClick={() => quick(0.5)} disabled={!active}>½</button>
           <button onClick={() => quick(0.75)} disabled={!active}>¾</button>
           <button onClick={() => quick(1)} disabled={!active}>POT</button>
         </div>
         <div className="sliderwrap">
+          <button className="step" disabled={!active} onClick={() => setRaise((r) => Math.max(prompt?.minRaise ?? 0, r - 20))}>−</button>
           <input
             type="range" min={prompt?.minRaise ?? 0} max={prompt?.maxRaise ?? 100}
             value={raise} disabled={!active || youStack <= need}
             onChange={(e) => setRaise(+e.target.value)}
           />
+          <button className="step" disabled={!active} onClick={() => setRaise((r) => Math.min(prompt?.maxRaise ?? r, r + 20))}>+</button>
           <span className="raiseval">◈ {raise.toLocaleString()}</span>
         </div>
-        <div className={`timer${timer <= 5 ? ' warn' : ''}`} style={{ ['--p' as string]: `${timerPct}%` }}>
-          <span>{timer}</span>
+        <div className="timerwrap">
+          <div className={`timer${timer <= 5 ? ' warn' : ''}`} style={{ ['--p' as string]: `${timerPct}%` }}>
+            <span>{timer}</span>
+          </div>
+          <span className="tb-label">TIME BANK</span>
         </div>
       </div>
     </div>

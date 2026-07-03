@@ -17,6 +17,8 @@ export type Stage = 'idle' | 'preflop' | 'flop' | 'turn' | 'river' | 'showdown';
 export type ActionType = 'fold' | 'call' | 'raise';
 
 export interface TableState {
+  /** server hand counter (multiplayer only; absent in local play) */
+  handNo?: number;
   players: Player[];
   deck: Card[];
   board: Card[];

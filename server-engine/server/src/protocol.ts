@@ -53,7 +53,7 @@ export interface RoomInfo {
   code: string;
   hostId: number;
   isPublic: boolean;
-  players: { id: number; name: string; ready: boolean; connected: boolean }[];
+  players: { id: number; name: string; ready: boolean; connected: boolean; isBot?: boolean }[];
   started: boolean;
   maxSeats: number;
 }
@@ -66,7 +66,9 @@ export interface ClientToServer {
   'auth:logout': (p: { token: string }, ack?: (r: { ok: boolean }) => void) => void;
   'room:create': (p: { isPublic: boolean }, ack: (r: { code: string } | { error: string }) => void) => void;
   'room:join': (p: { code: string }, ack: (r: { ok: true } | { error: string }) => void) => void;
-  'room:quickplay': (ack: (r: { code: string } | { error: string }) => void) => void;
+  'room:quickplay': (ack: (r: { code: string } | { error: string }) => void) => void;  'room:addBot': (...args: any[]) => void;
+  'room:removeBot': (p: { botId: number }) => void;
+
   'room:ready': (p: { ready: boolean }) => void;
   'room:start': () => void; // host only
   'room:leave': () => void;

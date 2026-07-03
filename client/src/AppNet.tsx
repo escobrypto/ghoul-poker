@@ -38,6 +38,9 @@ export default function AppNet() {
           onStart={() => g.startGame()}
           onLeave={() => g.leaveRoom()}
           onSetName={(n) => g.setName(n)}
+          onAddBot={g.addBot}
+          onRemoveBot={g.removeBot}
+          onPractice={() => g.practice()}
           onRegister={g.register}
           onLogin={g.login}
           onLogout={g.logout}

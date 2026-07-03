@@ -544,3 +544,9 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 .auth-actions .gbtn{flex:1}
 .auth-note{font-size:10px;line-height:1.6;color:#b9a8d8;opacity:.85}
 .auth-note b{color:var(--gold,#ffce4a)}
+
+/* ---- CPU opponents ---- */
+.seatrow.addbot{justify-content:center;cursor:pointer;background:rgba(157,78,221,.07);border-style:dashed;color:#b9a8d8;font:inherit;font-size:12px;letter-spacing:1px}
+.seatrow.addbot:hover{color:var(--neon);border-color:var(--neon)}
+.botx{margin-left:auto;background:none;border:1px solid var(--panel-edge);border-radius:6px;color:#ff5d7a;font:inherit;font-size:11px;line-height:1;padding:4px 7px;cursor:pointer}
+.botx:hover{border-color:#ff5d7a}

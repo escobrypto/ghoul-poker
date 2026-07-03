@@ -56,7 +56,7 @@ function emitFactoryFor(code: string) {
       const room = rooms.get(code); if (!room) return;
       io.to(code).emit('room:info', {
         code, hostId: room.hostId, isPublic: room.isPublic, started: room.started, maxSeats: room.maxSeats,
-        players: room.members.map((m) => ({ id: m.id, name: m.name, ready: m.ready, connected: m.connected })),
+        players: room.members.map((m) => ({ id: m.id, name: m.name, ready: m.ready, connected: m.connected, isBot: !!m.isBot })),
       });
     },
     chat: (name: string, msg: string) => io.to(code).emit('chat', { id: 0, name, msg }),
@@ -71,6 +71,7 @@ async function awardXp(code: string, result: any) {
     const winnerIds = new Set<number>(result.winners.map((w: any) => w.id));
     const participants: number[] = result.participants ?? [...winnerIds];
     for (const id of participants) {
+      if (id < 0) continue; // CPU seat — no XP, no stats, no Genesis, no DB writes
       await store.recordHand(id, winnerIds.has(id), 0);
       if (winnerIds.has(id)) await store.addXp(id, result.showdown ? 70 : 45);
       // GENESIS GHOUL: first 100 registered accounts to finish a hand.
@@ -183,6 +184,12 @@ io.on('connection', (socket) => {
     joinRoom(socket, room.code, ack);
   });
 
+  socket.on('room:addBot', (...args: any[]) => withRoom(socket, (room, s) => {
+    const ack = args.find((a) => typeof a === 'function'); // tolerate emit with or without a payload
+    const r = room.addBot(s.accountId);
+    if (ack) ack(r);
+  }));
+  socket.on('room:removeBot', ({ botId }) => withRoom(socket, (room, s) => room.removeBot(s.accountId, Number(botId))));
   socket.on('room:ready', ({ ready }) => withRoom(socket, (room, s) => room.setReady(s.accountId, ready)));
   socket.on('room:start', () => withRoom(socket, (room, s) => room.start(s.accountId)));
   socket.on('room:leave', () => leaveRoom(socket));

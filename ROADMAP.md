@@ -56,6 +56,7 @@ without rewrites. Bust-handling design decision still open (auto-refill goes
 away when economy is real).
 
 ## Also queued
+✅ CPU OPPONENTS — practice-vs-CPU button + host ADD/REMOVE CPU in room lobby. Bots: negative ids, ghoul-roster names/avatars, engine Monte-Carlo AI with human-feel delays, auto-ready, zero XP/stats/Genesis/leaderboard/DB footprint, cards redacted like anyone's, hands halt when no human remains, bot-only rooms GC'd. 10/10 E2E. Solves solo-testing AND the empty-lobby problem at launch.
 ⬜ Quick chat (RL-style presets, instant, non-intrusive, server rate-limited)
 ⬜ Rate limiting / abuse guards + name filter (before promoting outside BRYPTO)
 ⬜ Landing/rules screen ("fake chips, not gambling" explicit in-product)

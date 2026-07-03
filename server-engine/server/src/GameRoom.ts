@@ -29,7 +29,12 @@ export interface RoomMember {
   ready: boolean;
   /** seat reserves chips even while disconnected */
   stack: number;
+  /** CPU opponent — negative id, engine-AI piloted, earns no XP/stats/Genesis */
+  isBot?: boolean;
 }
+
+/** CPU seats borrow the ghoul roster so they get their pixel avatars client-side */
+const BOT_NAMES = ['Night Stalker', 'Degen Oracle', 'River Rat', 'Ghoul King', 'Liquidity Hunter', 'Crypto Banshee'];
 
 const TURN_MS = 20_000;          // server-authoritative action clock
 const SHOWDOWN_HOLD_MS = 3_500;  // let the win cinematic breathe before next hand
@@ -80,6 +85,29 @@ export class GameRoom {
     return { ok: true };
   }
 
+  /** host-only: seat a CPU opponent (auto-ready, never persists anything) */
+  addBot(byId: number): { ok: true } | { error: string } {
+    if (byId !== this.hostId) return { error: 'Only the host can add a CPU' };
+    if (this.started) return { error: 'Table already in play' };
+    if (this.members.length >= this.maxSeats) return { error: 'Table full' };
+    const used = new Set(this.members.map((m) => m.name));
+    this.botSeq--;
+    const name = BOT_NAMES.find((n) => !used.has(n)) ?? `CPU ${-this.botSeq}`;
+    this.members.push({ id: this.botSeq, name, connected: true, ready: true, stack: START_STACK, isBot: true });
+    this.emit.chat('TABLE', `🤖 ${name} sits down.`);
+    this.emit.roomInfo();
+    return { ok: true };
+  }
+
+  removeBot(byId: number, botId: number) {
+    if (byId !== this.hostId || this.started) return;
+    const bot = this.members.find((m) => m.isBot && m.id === botId);
+    if (!bot) return;
+    this.members = this.members.filter((m) => m !== bot);
+    this.emit.chat('TABLE', `🤖 ${bot.name} leaves the table.`);
+    this.emit.roomInfo();
+  }
+
   setReady(id: number, ready: boolean) {
     const m = this.members.find((x) => x.id === id); if (m) m.ready = ready;
     this.emit.roomInfo();
@@ -99,7 +127,7 @@ export class GameRoom {
     this.graceTimers.set(id, t);
   }
 
-  get isEmpty() { return this.members.every((m) => !m.connected); }
+  get isEmpty() { return this.members.every((m) => m.isBot || !m.connected); }
 
   // ---- starting play ----
   start(byId: number) {
@@ -113,6 +141,8 @@ export class GameRoom {
 
   /** account ids dealt into the current hand — stats + GENESIS credit go to these */
   private dealtIds: number[] = [];
+  /** negative id sequence for CPU seats (can never collide with real accounts) */
+  private botSeq = 0;
 
   // ---- the authoritative hand loop ----
   private startHand() {
@@ -162,9 +192,11 @@ export class GameRoom {
     this.pushState();
     const member = this.members.find((m) => m.id === p.id);
 
-    // A disconnected human is treated like a bot so the table never stalls.
-    if (!member || !member.connected) {
-      this.scheduleDrive(700, () => this.autoAct(p));
+    // CPUs think for a human-feeling beat; a disconnected human is treated the
+    // same way so the table never stalls.
+    if (!member || !member.connected || member.isBot) {
+      const delay = member?.isBot ? 700 + Math.random() * 900 : 700;
+      this.scheduleDrive(delay, () => this.autoAct(p));
       return;
     }
 
@@ -274,8 +306,10 @@ export class GameRoom {
   private scheduleNextHand() {
     this.clearLoop();
     this.loopTimer = setTimeout(() => {
-      // stop if fewer than 2 connected players remain
-      if (this.members.filter((m) => m.connected).length < 2) {
+      // stop if fewer than 2 connected players remain, or no HUMAN is left —
+      // CPUs never grind hands for an empty room
+      const humanOnline = this.members.some((m) => !m.isBot && m.connected);
+      if (!humanOnline || this.members.filter((m) => m.connected).length < 2) {
         this.started = false; this.state = null; this.emit.roomInfo(); return;
       }
       this.startHand();

@@ -144,6 +144,22 @@ export class GhoulSocket {
     });
   }
 
+  addBot(cb?: (ok: boolean) => void) {
+    this.sock.emit('room:addBot', (r: any) => {
+      if (r?.error) this.handlers.onError?.(r.error);
+      cb?.(!r?.error);
+    });
+  }
+  removeBot(botId: number) { this.sock.emit('room:removeBot', { botId }); }
+  /** one click: private table vs two CPUs, ready to start */
+  practice(cb: (code: string | null) => void) {
+    this.createRoom(false, (code) => {
+      if (!code) return cb(null);
+      this.addBot(); this.addBot();
+      cb(code);
+    });
+  }
+
   createRoom(isPublic: boolean, cb: (code: string | null) => void) {
     this.sock.emit('room:create', { isPublic }, (r: any) => {
       if (r.code) { sessionStorage.setItem('ghoul_room', r.code); cb(r.code); }

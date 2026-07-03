@@ -17,6 +17,9 @@ interface Props {
   onStart: () => void;
   onLeave: () => void;
   onSetName: (n: string) => void;
+  onAddBot: () => void;
+  onRemoveBot: (botId: number) => void;
+  onPractice: () => void;
   onRegister: (username: string, password: string, cb: (err: string | null) => void) => void;
   onLogin: (username: string, password: string, cb: (err: string | null) => void) => void;
   onLogout: () => void;
@@ -24,7 +27,7 @@ interface Props {
 }
 
 export default function Lobby({
-  profile, room, conn, latency, onQuickplay, onCreate, onJoin, onReady, onStart, onLeave, onSetName, onRegister, onLogin, onLogout, fetchLeaderboard,
+  profile, room, conn, latency, onQuickplay, onCreate, onJoin, onReady, onStart, onLeave, onSetName, onAddBot, onRemoveBot, onPractice, onRegister, onLogin, onLogout, fetchLeaderboard,
 }: Props) {
   const [code, setCode] = useState('');
   const [tab, setTab] = useState<'play' | 'ranks' | 'friends'>('play');
@@ -63,13 +66,17 @@ export default function Lobby({
             {room.players.map((p) => (
               <div key={p.id} className={`seatrow${p.ready ? ' ready' : ''}${!p.connected ? ' dim' : ''}`}>
                 <img src={avatarSrc(p.id === youId ? 'YOU' : p.name)} className="ghoul-img" alt="" />
-                <span className="nm">{p.name}{p.id === room.hostId ? ' 👑' : ''}{p.id === youId ? ' (you)' : ''}</span>
+                <span className="nm">{p.name}{p.isBot ? ' 🤖' : ''}{p.id === room.hostId ? ' 👑' : ''}{p.id === youId ? ' (you)' : ''}</span>
+                {p.isBot && isHost && <button className="botx" title="Remove CPU" onClick={() => onRemoveBot(p.id)}>✕</button>}
                 <span className="rdy">{p.ready ? 'READY' : '…'}</span>
               </div>
             ))}
             {Array.from({ length: Math.max(0, room.maxSeats - room.players.length) }, (_, i) => (
               <div key={`e${i}`} className="seatrow empty"><span className="nm">empty seat</span></div>
             ))}
+            {isHost && room.players.length < room.maxSeats && (
+              <button className="seatrow addbot" onClick={onAddBot}>🤖 ADD CPU OPPONENT</button>
+            )}
           </div>
           <div className="lobby-actions">
             <button className="gbtn call" onClick={() => onReady(!me?.ready)}>{me?.ready ? 'UNREADY' : 'READY UP'}</button>
@@ -159,6 +166,9 @@ export default function Lobby({
             </button>
             <button className="menu-btn" onClick={() => onCreate(false)}>
               <span className="mt">PRIVATE ROOM</span><span className="ms">Create a table, share the code</span>
+            </button>
+            <button className="menu-btn" onClick={onPractice}>
+              <span className="mt">PRACTICE VS CPU 🤖</span><span className="ms">Instant table against two ghoul bots</span>
             </button>
             <div className="join-row">
               <input placeholder="ENTER CODE" value={code} maxLength={5}

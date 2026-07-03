@@ -43,7 +43,7 @@ export interface RoomInfo {
   code: string;
   hostId: number;
   isPublic: boolean;
-  players: { id: number; name: string; ready: boolean; connected: boolean }[];
+  players: { id: number; name: string; ready: boolean; connected: boolean; isBot?: boolean }[];
   started: boolean;
   maxSeats: number;
 }

@@ -182,6 +182,9 @@ export function useGhoulNet(onSound?: (n: SfxName) => void) {
   const leaveRoom = useCallback(() => { sock.leaveRoom(); setRoom(null); setState(EMPTY_TABLE); }, [sock]);
   const setName = useCallback((n: string) => sock.setName(n), [sock]);
   const register = useCallback((usr: string, pw: string, cb: (err: string | null) => void) => sock.register(usr, pw, cb), [sock]);
+  const addBot = useCallback(() => sock.addBot(), [sock]);
+  const removeBot = useCallback((botId: number) => sock.removeBot(botId), [sock]);
+  const practice = useCallback((cb?: (code: string | null) => void) => sock.practice(cb || (() => {})), [sock]);
   const login = useCallback((usr: string, pw: string, cb: (err: string | null) => void) => sock.login(usr, pw, cb), [sock]);
   const logout = useCallback(() => sock.logout(), [sock]);
   const fetchLeaderboard = useCallback((cb: (rows: import('./protocol').LeaderRow[]) => void) => sock.requestLeaderboard(cb), [sock]);
@@ -196,6 +199,6 @@ export function useGhoulNet(onSound?: (n: SfxName) => void) {
     profile, room, conn, latency, turnEndsAt,
     // actions
     act, sendChat, quickplay, createRoom, joinRoom, ready, startGame, leaveRoom, setName, fetchLeaderboard,
-    register, login, logout,
+    register, login, logout, addBot, removeBot, practice,
   };
 }

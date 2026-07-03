@@ -103,6 +103,14 @@ export default function GhoulPokerTableScene({ state, winners, winningCards, bub
           <div className="pot-lbl">💀 POT 💀</div>
           <div className={`pot-amt${allInCinematic ? ' allin-pulse' : ''}`} key={potPulse} data-pulse={potPulse > 0}>{state.pot.toLocaleString()}</div>
         </div>
+        <div className="potchips">
+          {potDenoms.map((img) => (
+            <img key={img} src={`/assets/chips/${img}.png`} alt="" className="denom" />
+          ))}
+        </div>
+      </div>
+
+        {/* the board is SACRED — its own stage layer, above every seat/avatar */}
         <div className="community">
           {state.board.map((c, i) => (
             <CryptoCard
@@ -116,12 +124,6 @@ export default function GhoulPokerTableScene({ state, winners, winningCards, bub
             />
           ))}
         </div>
-        <div className="potchips">
-          {potDenoms.map((img) => (
-            <img key={img} src={`/assets/chips/${img}.png`} alt="" className="denom" />
-          ))}
-        </div>
-      </div>
 
       {/* tabletop candles */}
       {[[26, 70], [74, 70]].map(([x, y], i) => (

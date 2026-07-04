@@ -607,3 +607,7 @@ button.gbtn.allin.danger{animation:btnDanger .3s ease-in-out infinite;border-col
 .sliderwrap .step{width:34px;height:34px;border-radius:8px;background:rgba(11,7,24,.8);border:1.5px solid var(--panel-edge);color:var(--ink);font-size:18px;cursor:pointer;transition:.15s}
 .sliderwrap .step:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
 .sliderwrap .step:disabled{opacity:.3;cursor:not-allowed}
+
+/* real drip logo in the in-game top bar */
+.topbar-logo{height:34px;image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(157,78,221,.5))}
+.brand .roomtag{font-size:11px;letter-spacing:1px;color:var(--pink,#ff3da5);margin-left:10px;align-self:flex-end;padding-bottom:3px}

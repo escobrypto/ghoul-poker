@@ -53,8 +53,8 @@ export default function AppNet() {
         <div className="app app-immersive">
           <header className="topbar net-topbar">
             <div className="brand">
-              <div className="sigil">GG</div>
-              <div><h1>GHOUL <b>POKER</b></h1><small>ROOM {g.room?.code}</small></div>
+              <img src="/assets/ui/logo.png" className="topbar-logo" alt="GHOUL POKER" />
+              <small className="roomtag">ROOM {g.room?.code}</small>
             </div>
             <div className="tablemeta">
               NL HOLD'EM ◆ <b>10 / 20</b> ◆ HAND #{g.state.handNo || '—'}
